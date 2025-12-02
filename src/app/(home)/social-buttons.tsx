@@ -3,6 +3,7 @@ import GithubSVG from '@/svgs/github.svg'
 import { ANIMATION_DELAY, CARD_SPACING } from '@/consts'
 import { useConfigStore } from './stores/config-store'
 import JuejinSVG from '@/svgs/juejin.svg'
+import BilibiliSVG from '@/svgs/bilibili.svg'
 import EmailSVG from '@/svgs/email.svg'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
@@ -55,21 +56,21 @@ export default function SocialButtons() {
 
 					{secondaryShow && (
 						<motion.a
-							href='https://juejin.cn/user/2427311675422382'
+							href='https://space.bilibili.com/189975021'
 							target='_blank'
 							initial={{ opacity: 0, scale: 0.6 }}
 							animate={{ opacity: 1, scale: 1 }}
 							whileHover={{ scale: 1.05 }}
 							whileTap={{ scale: 0.95 }}
 							className='card relative flex items-center gap-2 rounded-xl px-3 py-2.5 font-medium whitespace-nowrap'>
-							<JuejinSVG className='h-6 w-6' />
-							稀土掘金
+							<BilibiliSVG className='h-6 w-6' />
+							哔哩哔哩
 						</motion.a>
 					)}
 
 					<motion.button
 						onClick={() => {
-							navigator.clipboard.writeText('yysuni1001@gmail.com').then(() => {
+							navigator.clipboard.writeText('liu67iq@gmail.com').then(() => {
 								toast.success('邮箱已复制到剪贴板')
 							})
 						}}
