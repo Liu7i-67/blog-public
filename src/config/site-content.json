@@ -1,19 +1,19 @@
 {
 	"meta": {
-		"title": "YYsuni",
-		"description": "YYsuni 的个人博客，记录前端开发、探索笔记。前端 UI 更新代码仓库。"
+		"title": "柒书",
+		"description": "67 的个人博客，随笔杂记，奇妙小工具~活到老，玩到老。"
 	},
 	"theme": {
-		"colorBrand": "#de4331",
-		"colorPrimary": "#4E3F42",
+		"colorBrand": "#35bfab",
+		"colorBrandSecondary": "#1fc9e7",
+		"colorPrimary": "#334f52",
 		"colorSecondary": "#7b888e",
-		"colorBrandSecondary": "#FCC841",
 		"colorBg": "#eeeeee",
 		"colorBorder": "#ffffff",
 		"colorCard": "#ffffff66",
 		"colorArticle": "#ffffffcc"
 	},
-	"backgroundColors": ["#FCC841", "#DFEFFC", "#DEDE92", "#DE4331", "#FE9750", "#FCC841"],
+	"backgroundColors": ["#EDDD62", "#9EE7D1", "#84D68A", "#EDDD62", "#88E6E5", "#a7f3d0"],
 	"artImages": [
 		{
 			"id": "cat",

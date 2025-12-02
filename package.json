@@ -3,10 +3,10 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev --turbopack -p 2025",
+		"dev": "next dev --turbopack -p 6167",
 		"svg": "node scripts/gen-svgs-index.js",
 		"build": "next build --turbopack",
-		"start": "next start",
+		"start": "next start -p 6167",
 		"format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\" \"*.{ts,js,json}\""
 	},
 	"dependencies": {
