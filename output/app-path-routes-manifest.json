@@ -1,0 +1,17 @@
+{
+  "/(home)/page": "/",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/about/page": "/about",
+  "/blog/[id]/page": "/blog/[id]",
+  "/blog/page": "/blog",
+  "/bloggers/page": "/bloggers",
+  "/image-toolbox/page": "/image-toolbox",
+  "/pictures/page": "/pictures",
+  "/projects/page": "/projects",
+  "/rss.xml/route": "/rss.xml",
+  "/share/page": "/share",
+  "/svgs/page": "/svgs",
+  "/write/[slug]/page": "/write/[slug]",
+  "/write/page": "/write"
+}
