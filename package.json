@@ -7,7 +7,8 @@
 		"svg": "node scripts/gen-svgs-index.js",
 		"build": "next build --turbopack",
 		"start": "next start -p 6167",
-		"format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\" \"*.{ts,js,json}\""
+		"format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\" \"*.{ts,js,json}\"",
+		"pm": "pm2 start ./ecosystem.config.js --name midway_app --max-memory-restart 1024M"
 	},
 	"dependencies": {
 		"@types/jsrsasign": "^10.5.15",
