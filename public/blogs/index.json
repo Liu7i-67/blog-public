@@ -1,13 +1,5 @@
 [
 	{
-		"slug": "test",
-		"title": "测试一下",
-		"tags": ["测试1", "测试2"],
-		"date": "2025-12-03",
-		"summary": "测试一下下",
-		"cover": "/blogs/test/5e5dcfa581512562.jpg"
-	},
-	{
 		"slug": "readme",
 		"title": "博客模板",
 		"tags": ["开源"],
