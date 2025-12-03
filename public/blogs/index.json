@@ -1,23 +1,18 @@
 [
-  {
-    "slug": "测试",
-    "title": "测试一下",
-    "tags": [
-      "测试1",
-      "测试2"
-    ],
-    "date": "2025-12-03",
-    "summary": "测试一下下",
-    "cover": "/blogs/测试/5e5dcfa581512562.jpg"
-  },
-  {
-    "slug": "readme",
-    "title": "2025 Blog 的使用引导",
-    "tags": [
-      "开源"
-    ],
-    "date": "2025-11-16",
-    "summary": "2025-blog-public 项目的使用说明以及注意事项",
-    "cover": "/blogs/readme/9532a65cc32ca5eb.png"
-  }
+	{
+		"slug": "test",
+		"title": "测试一下",
+		"tags": ["测试1", "测试2"],
+		"date": "2025-12-03",
+		"summary": "测试一下下",
+		"cover": "/blogs/测试/5e5dcfa581512562.jpg"
+	},
+	{
+		"slug": "readme",
+		"title": "2025 Blog 的使用引导",
+		"tags": ["开源"],
+		"date": "2025-11-16",
+		"summary": "2025-blog-public 项目的使用说明以及注意事项",
+		"cover": "/blogs/readme/9532a65cc32ca5eb.png"
+	}
 ]
