@@ -9,7 +9,6 @@ import SocialButtons from '@/app/(home)/social-buttons'
 import ShareCard from '@/app/(home)/share-card'
 import AritcleCard from '@/app/(home)/aritcle-card'
 import WriteButtons from '@/app/(home)/write-buttons'
-import LikePosition from './like-position'
 import { useSize } from '@/hooks/use-size'
 
 export default function Home() {
@@ -26,7 +25,6 @@ export default function Home() {
 			{!maxSM && <ShareCard />}
 			<AritcleCard />
 			{!maxSM && <WriteButtons />}
-			<LikePosition />
 		</div>
 	)
 }
