@@ -1,12 +1,176 @@
-[00:00:01.058] Server  LOG      ✓ Ready in 757ms
-[00:00:05.815] Server  WARN     ⚠ Cross origin request detected from 192.168.150.7 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
-Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
-[00:00:08.841] Server  LOG      ○ Compiling / ...
-[00:00:11.700] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:01:20.319] Server  LOG      ✓ Compiled in 86ms
-[00:01:36.926] Server  LOG      ✓ Compiled in 64ms
-[00:01:52.477] Server  LOG      ✓ Compiled in 63ms
-[00:01:54.873] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'writeText')
-[00:02:07.770] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:02:09.339] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'writeText')
-[00:02:24.479] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:00:01.084] Server  LOG      ✓ Ready in 761ms
+[00:00:05.147] Server  LOG      ○ Compiling / ...
+[00:00:08.441] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:09.124] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="zh-CN" suppressHydrationWarning={true} style={{cursor:"ur...", ...}}>
+                          <head>
+                          <body
+-                           data-atm-ext-installed="1.29.12"
+                          >
+                  ...
+
+[00:01:19.926] Server  LOG      ✓ Compiled in 173ms
+[00:01:23.102] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:23.226] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="zh-CN" suppressHydrationWarning={true} style={{cursor:"ur...", ...}}>
+                          <head>
+                          <body
+-                           data-atm-ext-installed="1.29.12"
+                          >
+                  ...
+
+[00:01:26.576] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:02:48.310] Server  LOG      ✓ Compiled in 163ms
+[00:02:56.347] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:56.480] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.tsx">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <script>
+                      <RootLayout>
+                        <html lang="zh-CN" suppressHydrationWarning={true} style={{cursor:"ur...", ...}}>
+                          <head>
+                          <body
+-                           data-atm-ext-installed="1.29.12"
+                          >
+                  ...
+
+[00:04:06.027] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:04:06.434] Browser WARN    Image with src "/images/avatar.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:04:32.036] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:07:44.802] Server  LOG      ✓ Compiled in 183ms
+[00:07:48.810] Server  LOG      ✓ Compiled in 192ms
+[00:07:50.081] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:58.985] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:07:58.985] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:09:05.921] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:09:06.294] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:09:06.294] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:09:08.653] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:09:35.538] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:10:42.520] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:11:29.425] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:11:29.425] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:11:29.425] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:11:49.950] Server  LOG      ✓ Compiled in 179ms
+[00:11:50.123] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:12:19.771] Server  LOG      ✓ Compiled in 186ms
+[00:12:20.000] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:12:41.238] Server  LOG      ✓ Compiled in 182ms
+[00:12:41.497] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:12:47.706] Server  LOG      ✓ Compiled in 176ms
+[00:12:47.791] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:13:07.719] Server  LOG      ✓ Compiled in 189ms
+[00:13:08.129] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:13:38.053] Server  LOG      ✓ Compiled in 166ms
+[00:13:38.243] Browser LOG     666 {"APP_ID":"2395746","BRANCH":"main","OWNER":"Liu7i-67","REPO":"blog-public"}
+[00:14:10.201] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:15:43.373] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:16:50.163] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:16:57.958] Browser WARN    Couldn't find a React instance for the element
+[00:17:25.698] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:17:31.965] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:18:17.107] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:18:25.880] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[00:18:28.972] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:18:29.490] Browser WARN    Image with src "/images/avatar.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:18:51.694] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:18:56.288] Browser WARN    Couldn't find a React instance for the element
+[00:19:13.282] Server  LOG      ✓ Compiled in 169ms
+[00:19:25.563] Browser WARN    Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior

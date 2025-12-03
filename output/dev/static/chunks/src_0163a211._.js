@@ -20,11 +20,11 @@ var _s = __turbopack_context__.k.signature();
 function HiCard() {
     _s();
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$1_$40$babel$2b$core$40$7$2e$2_e2df17bc924c9c875ca07161f3952b17$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(10);
-    if ($[0] !== "07521a2becde2a2adbb6a97631571e1ebd77fa146c2056f3e7bfd8d680b862b2") {
+    if ($[0] !== "e85964912ba00e966f9bece8f48385f09644b035afafb1686b001efd1c388a46") {
         for(let $i = 0; $i < 10; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "07521a2becde2a2adbb6a97631571e1ebd77fa146c2056f3e7bfd8d680b862b2";
+        $[0] = "e85964912ba00e966f9bece8f48385f09644b035afafb1686b001efd1c388a46";
     }
     const center = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$center$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCenterStore"])();
     const { cardStyles } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f28$home$292f$stores$2f$config$2d$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useConfigStore"])();
@@ -38,8 +38,7 @@ function HiCard() {
             className: "mx-auto rounded-full",
             style: {
                 width: 120,
-                height: 120,
-                boxShadow: " 0 16px 32px -5px #E2D9CE"
+                height: 120
             }
         }, void 0, false, {
             fileName: "[project]/src/app/(home)/hi-card.tsx",
@@ -57,7 +56,7 @@ function HiCard() {
             children: "柒书"
         }, void 0, false, {
             fileName: "[project]/src/app/(home)/hi-card.tsx",
-            lineNumber: 33,
+            lineNumber: 32,
             columnNumber: 10
         }, this);
         $[2] = t1;
@@ -73,14 +72,14 @@ function HiCard() {
                 " ",
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$1_$40$babel$2b$core$40$7$2e$2_e2df17bc924c9c875ca07161f3952b17$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
                     fileName: "[project]/src/app/(home)/hi-card.tsx",
-                    lineNumber: 40,
+                    lineNumber: 39,
                     columnNumber: 57
                 }, this),
                 " 活到老，玩到老"
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/(home)/hi-card.tsx",
-            lineNumber: 40,
+            lineNumber: 39,
             columnNumber: 10
         }, this);
         $[3] = t2;
@@ -102,7 +101,7 @@ function HiCard() {
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/(home)/hi-card.tsx",
-            lineNumber: 47,
+            lineNumber: 46,
             columnNumber: 10
         }, this);
         $[4] = styles.height;
