@@ -54,6 +54,7 @@ try {
 	console.log('📦 开始 自动提交 ...')
 	execSync('git add .', { stdio: 'inherit' })
 	execSync('git commit -m "打包自动提交"', { stdio: 'inherit', shell: true })
+	execSync('git push', { stdio: 'inherit', shell: true })
 } catch (err) {
 	console.error('❌ 自动提交失败失败', err)
 	process.exit(1)
