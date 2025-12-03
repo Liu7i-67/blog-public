@@ -48,3 +48,13 @@ function copyDir(src, dest) {
 console.log('📁 复制 .next 到 output ...')
 copyDir(nextDir, outputDir)
 console.log('✅ 输出完成到 output 文件夹')
+
+// 自动提交
+try {
+	console.log('📦 开始 自动提交 ...')
+	execSync('git add .', { stdio: 'inherit' })
+	execSync('git commit -m "打包自动提交"', { stdio: 'inherit', shell: true })
+} catch (err) {
+	console.error('❌ 自动提交失败失败', err)
+	process.exit(1)
+}
