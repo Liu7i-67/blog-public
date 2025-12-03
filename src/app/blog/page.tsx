@@ -5,11 +5,11 @@ import dayjs from 'dayjs'
 import { motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { ANIMATION_DELAY, INIT_DELAY } from '@/consts'
+import { ANIMATION_DELAY, GITHUB_CONFIG, INIT_DELAY } from '@/consts'
 import ShortLineSVG from '@/svgs/short-line.svg'
 import { useBlogIndex, type BlogIndexItem } from '@/hooks/use-blog-index'
 import { useReadArticles } from '@/hooks/use-read-articles'
-import JuejinSVG from '@/svgs/juejin.svg'
+import BilibiliSVG from '@/svgs/bilibili.svg'
 import { useAuthStore } from '@/hooks/use-auth'
 import { readFileAsText } from '@/lib/file-utils'
 import { cn } from '@/lib/utils'
@@ -31,6 +31,7 @@ export default function BlogPage() {
 		if (!editMode) {
 			setEditableItems(items)
 		}
+		console.log(666, GITHUB_CONFIG)
 	}, [items, editMode])
 
 	const displayItems = editMode ? editableItems : items
@@ -237,11 +238,11 @@ export default function BlogPage() {
 								animate={{ opacity: 1, scale: 1 }}
 								whileHover={{ scale: 1.05 }}
 								whileTap={{ scale: 0.95 }}
-								href='https://juejin.cn/user/2427311675422382/posts'
+								href='https://space.bilibili.com/189975021'
 								target='_blank'
 								className='card text-secondary static inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs'>
-								<JuejinSVG className='h-4 w-4' />
-								更多
+								<BilibiliSVG className='h-4 w-4' />
+								已经到底啦，去看看我的视频？
 							</motion.a>
 						</div>
 					)}

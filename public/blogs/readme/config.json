@@ -1,9 +1,7 @@
 {
-  "title": "2025 Blog 的使用引导",
-  "tags": [
-    "开源"
-  ],
-  "date": "2025-11-16",
-  "summary": "2025-blog-public 项目的使用说明以及注意事项",
-  "cover": "/blogs/readme/9532a65cc32ca5eb.png"
+	"title": "关于博客模板",
+	"tags": ["开源"],
+	"date": "2025-11-16",
+	"summary": "关于博客模板的说明",
+	"cover": "/blogs/readme/9532a65cc32ca5eb.png"
 }
