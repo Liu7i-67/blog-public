@@ -1,10 +1,20 @@
 [
-	{
-		"slug": "readme",
-		"title": "博客模板",
-		"tags": ["开源"],
-		"date": "2025-11-16",
-		"summary": "2025-blog-public 项目的使用说明以及注意事项",
-		"cover": "/blogs/readme/9532a65cc32ca5eb.png"
-	}
+  {
+    "slug": "about-blog",
+    "title": "关于博客",
+    "tags": [],
+    "date": "2025-12-03",
+    "summary": "关于博客的一系列折腾",
+    "cover": "/blogs/about-blog/55a3a4f38cad1f50.jpg"
+  },
+  {
+    "slug": "readme",
+    "title": "博客模板",
+    "tags": [
+      "开源"
+    ],
+    "date": "2025-11-16",
+    "summary": "2025-blog-public 项目的使用说明以及注意事项",
+    "cover": "/blogs/readme/9532a65cc32ca5eb.png"
+  }
 ]
