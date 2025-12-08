@@ -8,13 +8,14 @@ import { WriteEditor } from '../components/editor'
 import { WriteSidebar } from '../components/sidebar'
 import { WriteActions } from '../components/actions'
 import { WritePreview } from '../components/preview'
+import { WritePreviewLive } from '../components/previewLive'
 
 export default function EditBlogPage() {
 	const params = useParams() as { slug?: string }
 	const slug = params?.slug || ''
 
 	const { form, cover } = useWriteStore()
-	const { isPreview, closePreview } = usePreviewStore()
+	const { isPreview, isPreviewLive, closePreview } = usePreviewStore()
 	const { loading } = useLoadBlog(slug)
 
 	const coverPreviewUrl = cover ? (cover.type === 'url' ? cover.url : cover.previewUrl) : null
@@ -33,7 +34,8 @@ export default function EditBlogPage() {
 		<>
 			<div className='flex h-full justify-center gap-6 px-6 pt-24 pb-12'>
 				<WriteEditor />
-				<WriteSidebar />
+				{isPreviewLive && <WritePreviewLive form={form} coverPreviewUrl={coverPreviewUrl} />}
+				{!isPreviewLive && <WriteSidebar />}
 			</div>
 
 			<WriteActions />
