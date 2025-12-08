@@ -8,7 +8,7 @@ import { usePublish } from '../hooks/use-publish'
 
 export function WriteActions() {
 	const { loading, mode, form, loadBlogForEdit, originalSlug, updateForm } = useWriteStore()
-	const { openPreview } = usePreviewStore()
+	const { openPreview, openPreviewLive, closePreviewLive, isPreviewLive } = usePreviewStore()
 	const { isAuth, onChoosePrivateKey, onPublish, onDelete } = usePublish()
 	const [saving, setSaving] = useState(false)
 	const keyInputRef = useRef<HTMLInputElement>(null)
@@ -129,6 +129,28 @@ export function WriteActions() {
 					disabled={loading}
 					onClick={openPreview}>
 					预览
+				</motion.button>
+				<motion.button
+					initial={{ opacity: 0, scale: 0.6 }}
+					animate={{ opacity: 1, scale: 1 }}
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					className='bg-card rounded-xl border px-6 py-2 text-sm'
+					disabled={loading}
+					hidden={!isPreviewLive}
+					onClick={closePreviewLive}>
+					退出实时预览
+				</motion.button>
+				<motion.button
+					initial={{ opacity: 0, scale: 0.6 }}
+					animate={{ opacity: 1, scale: 1 }}
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					className='bg-card rounded-xl border px-6 py-2 text-sm'
+					disabled={loading}
+					hidden={isPreviewLive}
+					onClick={openPreviewLive}>
+					实时预览
 				</motion.button>
 				<motion.button
 					initial={{ opacity: 0, scale: 0.6 }}
