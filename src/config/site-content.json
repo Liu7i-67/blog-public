@@ -37,21 +37,21 @@
 		{
 			"id": "github",
 			"type": "github",
-			"value": "https://github.com/yysuni",
+			"value": "https://github.com/Liu7i-67",
 			"label": "Github",
 			"order": 3
 		},
 		{
-			"id": "juejin",
-			"type": "juejin",
-			"value": "https://juejin.cn/user/2427311675422382",
-			"label": "稀土掘金",
+			"id": "bilibili",
+			"type": "bilibili",
+			"value": "https://space.bilibili.com/189975021",
+			"label": "哔哩哔哩",
 			"order": 2
 		},
 		{
 			"id": "email",
 			"type": "email",
-			"value": "yysuni1001@gmail.com",
+			"value": "liu67iq@gmail.com",
 			"label": "",
 			"order": 1
 		}
