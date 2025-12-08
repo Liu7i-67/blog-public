@@ -3,54 +3,41 @@
 		"name": "POE-TRADE-CN",
 		"year": 2025,
 		"description": "流放之路国际服市集翻译插件",
-		"image": "https://pixel-motion.yysuni.com/favicon.svg",
-		"url": "https://pixel-motion.yysuni.com/",
-		"tags": ["像素画", "React", "Figma", "阮周刊"]
+		"image": "https://store-images.s-microsoft.com/image/apps.56557.1a895a2d-7507-4726-9ee9-f1b0da7febbc.7b759647-0fcd-4275-ae61-cee3c838d530.5e8d660d-8e17-467a-9310-c54c539e990e?mode=scale&h=100&q=90&w=100",
+		"url": "https://liuqi.cool/poe_trade_cn/resource.html",
+		"tags": ["流放之路", "插件"]
 	},
 	{
-		"name": "Path Motion",
+		"name": "ZA-MAP",
 		"year": 2025,
-		"description": "在线 svg path 工具，针对 path 绘制、压缩、运动等功能",
-		"image": "https://path-motion.yysuni.com/favicon.svg",
-		"url": "https://path-motion.yysuni.com/canvas",
-		"tags": ["SVG", "Path", "Motion", "阮周刊"],
-		"github": "https://github.com/YYsuni/path-motion"
+		"description": "宝可梦传说ZA大地图插件",
+		"image": "https://store-images.s-microsoft.com/image/apps.4698.a19b5545-abb9-4224-ac3a-5fe9ce306d8d.f5273633-72f6-4dce-abd9-8603f9273405.222d2f5f-1612-4034-a476-05089ef305b3?mode=scale&h=100&q=90&w=100",
+		"url": "https://liuqi.cool/za_map/index.html",
+		"tags": ["宝可梦", "地图", "插件"]
 	},
 	{
-		"name": "JSON Viewer",
-		"year": 2023,
-		"description": "React 的 JSON 查看/编辑组件，组件的实现方式依赖于 html 原生逻辑，比较轻量化。第二个用心的组件，学习了前辈的包装方式，介绍方式，网站样式。用户也慢慢多了起来。",
-		"image": "https://jv.yysuni.com/favicon.svg",
-		"url": "https://jv.yysuni.com/",
-		"tags": ["React", "JSON", "Viewer", "阮周刊"],
-		"github": "https://github.com/YYsuni/react18-json-view",
-		"npm": "https://www.npmjs.com/package/react18-json-view"
+		"name": "lib7i-react",
+		"year": 2025,
+		"description": "自用React组件库，不定时更新",
+		"image": "/images/avatar.png",
+		"tags": ["React", "Library"],
+		"npm": "https://www.npmjs.com/package/lib7i-react",
+		"url": "/"
 	},
 	{
-		"name": "第一版 Blog 网站",
+		"name": "Canvas画板",
 		"year": 2023,
-		"description": "最开始是觉得掘金这种网站写文章挺好的。后面还是想写一个自己网站，体现自己的风格。MDX 还可以自己写组件到 blog，直接交互，多好。。。没想到为以后埋下了坑。",
-		"image": "https://blog-archive.yysuni.com/favicons/android-chrome-512x512.png",
-		"url": "https://blog-archive.yysuni.com/",
+		"description": "在线绘图工具，支持导出canvas js代码",
+		"image": "/images/avatar.png",
+		"url": "https://liuqi.cool/html/tools/drawing-board/index.html",
+		"tags": ["Canvas", "Js"]
+	},
+	{
+		"name": "上一版Blog网站",
+		"year": 2023,
+		"description": "其实也不是上一版，也会新增新功能",
+		"image": "/images/avatar.png",
+		"url": "https://liuqi.cool/",
 		"tags": ["Next.js", "MDX"]
-	},
-	{
-		"name": "Blockies",
-		"year": 2023,
-		"description": " Blockies React组件，SVG 实现，用于生成区块链地址的图标。这是我的第一个有人用的组件，虽然人不多",
-		"image": "/images/blockies.svg",
-		"url": "https://blockies-react-svg.vercel.app/",
-		"tags": ["React", "SVG", "Blockies"],
-		"github": "https://github.com/YYsuni/blockies-react-svg",
-		"npm": "https://www.npmjs.com/package/blockies-react-svg"
-	},
-	{
-		"name": "Vue3 组件库",
-		"year": 2021,
-		"description": "比较让人怀念的一个组件库了，那个时候每个前端程序员都想做一套自己的组件库，我也是。写出来的时候特别让自己开心，觉得好看，舒服。那时也第一次学会免费的 github/gitee pages 部署页面，但也倒腾半天，现在用 vercel 重新上线放着吧。",
-		"image": "/images/vue-kit.webp",
-		"url": "http://archive-suni.vercel.app/#/",
-		"tags": ["Vue", "Library"],
-		"github": "https://github.com/YYsuni/archive-suni"
 	}
 ]
