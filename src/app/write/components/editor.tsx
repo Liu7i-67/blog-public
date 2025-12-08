@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { useWriteStore } from '../stores/write-store'
 import { INIT_DELAY } from '@/consts'
 import { useRef } from 'react'
+import { MarkdownToolbar } from './MarkdownToolbar'
 
 const defaultText = 'text'
 
@@ -177,6 +178,7 @@ export function WriteEditor() {
 					onChange={e => updateForm({ slug: e.target.value })}
 				/>
 			</div>
+			<MarkdownToolbar insertText={insertText} />
 			<textarea
 				ref={textareaRef}
 				placeholder='Markdown 内容'
