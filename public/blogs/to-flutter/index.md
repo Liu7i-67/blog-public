@@ -51,4 +51,65 @@ Retrying request...
 
 这种方式启动的项目没有后续的热更新，因此跑通了之后还是建议使用官方教程的方式进行运行
 
+<span style="color:#cbc8c8">计划有变，最近玩火炬之光无限比较多，先写个火炬之光无限的图鉴玩玩</span>
+
+# 应用结构
+
+[我的练手项目](https://github.com/Liu7i-67/torchlight_dex)
+
+<span style="color:#ff4757">我也是刚接触`Flutter`，请带着批评性的目光阅读以下内容</span>
+
+目前为止的体验比较类似用`kotlin`写安卓，但是写起来会更轻松一点，具体表现在不用引入特别多的包
+
+## 入口文件
+
+`demo`中入口文件位于`lib/main.dart`，可以将它理解为`react`的`index.tsx`
+
+文件中的`runApp`类似于`react`中的`ReactDOM.render()`
+
+## 组件
+
+`Flutter`有一个`Widget`概念，类似于`React`中的`Component`
+
+每一个`Widget`都可以作为一个页面存在
+
+先看看下面的代码示例，展示了`Widget`的基本使用：
+```dart
+import 'package:flutter/material.dart';
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+	  	// 定义页面的标题 可空
+      appBar: AppBar(centerTitle: true, title: Text("首页")),
+			// 定义
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('欢迎使用')
+          ],
+        ),
+      ),
+			// 侧边栏
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(children: [const SizedBox(height: 10), Text('侧边栏')]),
+        ),
+      ),
+      // 浮动按钮
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     print('啊哈');
+      //   },
+      //   child: const Icon(Icons.brightness_7_outlined),
+      // ),
+    );
+  }
+}
+```
+
 
