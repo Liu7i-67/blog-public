@@ -85,7 +85,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
 	  	// 定义页面的标题 可空
       appBar: AppBar(centerTitle: true, title: Text("首页")),
-			// 定义
+			// 内容
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -111,5 +111,55 @@ class HomePage extends StatelessWidget {
   }
 }
 ```
+##　路由
+`Flutter`的路由管理有多种形式，我个人倾向于下面这种类似于`React`的
+```dart
+import 'package:flutter/material.dart';
+import 'package:torchlight_dex/pages/detail/detail.dart';
+import 'package:torchlight_dex/pages/home/home.dart';
 
+void main() {
+  runApp(const MainApp());
+}
+
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: "火炬之光",
+      initialRoute: "/",
+      routes: {
+        '/': (context) => HomePage(),
+        '/detail': (context) => DetailPage(),
+      },
+    );
+  }
+}
+```
+
+路由跳转
+```dart
+ElevatedButton(
+  onPressed: () {
+    Navigator.pushNamed(
+      context,
+      '/detail',
+      arguments: {'id': 123, "title": "查询"},
+    );
+  },
+  child: const Text("进入详情页"),
+),
+```
+
+返回上一级
+```dart
+ElevatedButton(
+  onPressed: () {
+    Navigator.pop(context); // 返回
+  },
+  child: const Text("返回"),
+)
+```
 
