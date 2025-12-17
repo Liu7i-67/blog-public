@@ -1,5 +1,16 @@
 [
   {
+    "slug": "about-remote-desktop",
+    "title": "关于远程桌面",
+    "tags": [
+      "日常",
+      "window"
+    ],
+    "date": "2025-12-16",
+    "summary": "关于快捷修改window多显示器展示方式",
+    "cover": "/blogs/about-remote-desktop/61c52edd1a48aa21.png"
+  },
+  {
     "slug": "to-flutter",
     "title": "探索一番Flutter",
     "tags": [
