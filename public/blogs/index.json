@@ -1,49 +1,42 @@
 [
-  {
-    "slug": "about-remote-desktop",
-    "title": "关于远程桌面",
-    "tags": [
-      "日常",
-      "window"
-    ],
-    "date": "2025-12-16",
-    "summary": "关于快捷修改window多显示器展示方式",
-    "cover": "/blogs/about-remote-desktop/61c52edd1a48aa21.png"
-  },
-  {
-    "slug": "to-flutter",
-    "title": "探索一番Flutter",
-    "tags": [
-      "Flutter"
-    ],
-    "date": "2025-12-09",
-    "summary": "之前用react native写了一个安卓应用，想要加一些渐变阴影太麻烦了，试一试Flutter如何",
-    "cover": "/blogs/to-flutter/240afa8bf174729e.jpg"
-  },
-  {
-    "slug": "javascript-base",
-    "title": "JavaScript教程阅读笔记（更新中）",
-    "tags": [],
-    "date": "2025-12-08",
-    "summary": "",
-    "cover": "/blogs/javascript-base/ad0b95262479506f.jpg"
-  },
-  {
-    "slug": "about-blog",
-    "title": "关于博客",
-    "tags": [],
-    "date": "2025-12-03",
-    "summary": "关于博客的一系列折腾",
-    "cover": "/blogs/about-blog/55a3a4f38cad1f50.jpg"
-  },
-  {
-    "slug": "readme",
-    "title": "博客模板",
-    "tags": [
-      "开源"
-    ],
-    "date": "2025-11-16",
-    "summary": "2025-blog-public 项目的使用说明以及注意事项",
-    "cover": "/blogs/readme/9532a65cc32ca5eb.png"
-  }
+	{
+		"slug": "about-remote-desktop",
+		"title": "关于远程桌面",
+		"tags": ["日常", "window"],
+		"date": "2025-12-16",
+		"summary": "关于快捷修改window多显示器展示方式",
+		"cover": "/blogs/about-remote-desktop/61c52edd1a48aa21.png"
+	},
+	{
+		"slug": "to-flutter",
+		"title": "探索一番Flutter",
+		"tags": ["Flutter"],
+		"date": "2025-12-09",
+		"summary": "之前用react native写了一个安卓应用，想要加一些渐变阴影太麻烦了，试一试Flutter如何",
+		"cover": "/blogs/to-flutter/240afa8bf174729e.jpg"
+	},
+	{
+		"slug": "javascript-base",
+		"title": "JavaScript教程阅读笔记（更新中）",
+		"tags": [],
+		"date": "2025-12-08",
+		"summary": "",
+		"cover": "/blogs/javascript-base/ad0b95262479506f.jpg"
+	},
+	{
+		"slug": "about-blog",
+		"title": "关于博客",
+		"tags": [],
+		"date": "2025-12-03",
+		"summary": "关于博客的一系列折腾",
+		"cover": "/blogs/about-blog/55a3a4f38cad1f50.jpg"
+	},
+	{
+		"slug": "readme",
+		"title": "博客模板",
+		"tags": ["开源"],
+		"date": "2025-11-16T08:00",
+		"summary": "2025-blog-public 项目的使用说明以及注意事项",
+		"cover": "/blogs/readme/9532a65cc32ca5eb.png"
+	}
 ]
