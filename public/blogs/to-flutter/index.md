@@ -44,7 +44,7 @@ Downloading android-arm-profile/windows-x64 tools...
 I/O exception ... http://127.0.0.1:7890 -> https://plugins.gradle.org:443: Connection reset
 Retrying request...
 ```
-我在安卓配置了代理，但是现在我的代理不允许局域网访问导致的，修改为允许即可
+我在`Android Studio`配置了代理，但是现在我的代理不允许局域网访问导致的，修改为允许即可
 
 修改完成后再次允许，成功启动项目
 ![效果图](/blogs/to-flutter/9a971098e7d925ae.webp)
