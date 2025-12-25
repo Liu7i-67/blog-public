@@ -322,3 +322,9 @@ Image.asset(
 | 目标用途 | 开发阶段，<br/>用于快速迭代和调试。 | 发布应用，<br/>用于正式上传到应用商店<br/>或分发给用户。 | 减小 APK 文件大小，<br/>适用于分发给用户。 |
 | 输出文件 | 一个 Debug APK <br/>文件。 | 一个 “胖 (Fat)” Release APK<br/> 文件（包含所有<br/>CPU 架构的代码）。 | 多个 小型 Release APK<br/> 文件（每个文件<br/>只包含一个 CPU 架构的代码）。 |
 | 文件大小 | <span style="color:#ff4757">较大</span> | <span style="color:#1e90ff">大</span> | <span style="color:#2ed573">小</span> |
+
+##　补充
+
+还是写了一版心心念念的神奇宝贝百科图鉴，一个字**爽**！
+
+[宝可梦百科柒](https://github.com/Liu7i-67/blog-public/releases/tag/pkm0.0.3)

@@ -3,7 +3,9 @@
   "tags": [
     "Flutter"
   ],
-  "date": "2025-12-09",
+  "date": "2025-12-09T08:00",
   "summary": "之前用react native写了一个安卓应用，想要加一些渐变阴影太麻烦了，试一试Flutter如何",
-  "cover": "/blogs/to-flutter/240afa8bf174729e.jpg"
+  "cover": "/blogs/to-flutter/240afa8bf174729e.jpg",
+  "hidden": false,
+  "category": ""
 }
