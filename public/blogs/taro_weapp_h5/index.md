@@ -4,6 +4,8 @@
 
 # 集成tailwind
 
+[官方集成示例](https://docs.taro.zone/en/docs/tailwindcss)
+
 天下苦命名久矣！`Taro`也是可以使用`tailwind`的
 
 我使用的`Taro 4.0.12`，集成方法如下
