@@ -1,5 +1,17 @@
 [
   {
+    "slug": "taro_weapp_h5",
+    "title": "用Taro写一个静态小程序+H5",
+    "tags": [
+      "taro"
+    ],
+    "date": "2026-01-04T15:54",
+    "summary": "一个简易需求，需要写一个静态页面，同时支持h5和小程序，使用taro就是很自然的事情了",
+    "cover": "/blogs/taro_weapp_h5/498f978fb0a6cde5.jpg",
+    "hidden": false,
+    "category": "日常"
+  },
+  {
     "slug": "pywebview-rapidocr",
     "title": "PyWebview+rapidocr打包记录",
     "tags": [
