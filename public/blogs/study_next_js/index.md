@@ -223,4 +223,51 @@ export default {
   plugins: [],
 };
 ```
+
+## 问题二
+
+除了列表，肯定还需要有宝可梦详情页的展示，我在`/app/pokemon/[no]/page.tsx`中定义了详情页
+
+通过`no`去查询详情信息，发现一直报错
+
+打印了一下页面的`params`发现居然是个`Promise`，也就是说获取路由参数需要这样子
+
+```ts
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import PokemonDetailClient from "./PokemonDetailClient";
+import { serialize } from "@/utils/tool";
+
+export default async function PokemonDetail({
+  params,
+}: {
+  params: Promise<{ no: string }>;
+}) {
+  // 核心处理
+  const no = +(await params).no;
+
+  const pokemon = await prisma.pokemon.findUnique({
+    where: { no },
+  });
+
+  if (!pokemon) notFound();
+
+  const regionalForms = await prisma.pokemonRegional.findMany({
+    where: { no },
+    include: {
+      abilities: { include: { ability: true } },
+      groups: { include: { group: true } },
+      keyRecords: true,
+      images: true,
+    },
+  });
+
+  return (
+    <PokemonDetailClient
+      pokemon={serialize(pokemon)}
+      regionalForms={serialize(regionalForms)}
+    />
+  );
+}
+```
  
