@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>国际象棋 // ROYAL GAMBIT</title>
+		<link rel="icon" href="/favicon.png" />
+		<!-- 引入高质量字体 -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=JetBrains+Mono:wght@400;700&family=Noto+Serif+SC:wght@700;900&display=swap"
+			rel="stylesheet" />
+		<!-- 引入 chess.js 引擎 (用于棋局合法性验证与逻辑) -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+		<style>
+			:root {
+				--bg-noir: #0a0a0a;
+				--surface-dark: #121212;
+				--surface-light: #e5e5e5;
+				--accent-red: #d90429;
+				--text-pure: #ffffff;
+				--text-dim: #777777;
+
+				--board-light: #d1d5db;
+				--board-dark: #334155;
+				--board-border: #f8fafc;
+			}
+
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+				user-select: none;
+			}
+
+			body {
+				background-color: var(--bg-noir);
+				color: var(--text-pure);
+				font-family: 'JetBrains Mono', 'Noto Serif SC', monospace;
+				min-height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				overflow: hidden;
+				background-image:
+					linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+				background-size: 40px 40px;
+			}
+
+			.layout {
+				display: flex;
+				gap: 60px;
+				align-items: stretch;
+				max-width: 1200px;
+				width: 100%;
+				padding: 40px;
+				position: relative;
+			}
+
+			/* 背景装饰字 */
+			.ambient-text {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				font-family: 'Cinzel', serif;
+				font-size: 30vw;
+				color: rgba(255, 255, 255, 0.015);
+				font-weight: 900;
+				white-space: nowrap;
+				pointer-events: none;
+				z-index: 0;
+				letter-spacing: -2vw;
+			}
+
+			/* 侧边栏面板 */
+			.panel {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				z-index: 10;
+			}
+
+			.panel.left {
+				text-align: right;
+				align-items: flex-end;
+			}
+			.panel.right {
+				text-align: left;
+				align-items: flex-start;
+			}
+
+			.player-info {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+
+			.player-title {
+				font-family: 'Noto Serif SC', serif;
+				font-size: 3rem;
+				font-weight: 900;
+				line-height: 1;
+				letter-spacing: 4px;
+				color: var(--text-pure);
+				position: relative;
+			}
+
+			.active-indicator {
+				font-size: 0.8rem;
+				text-transform: uppercase;
+				letter-spacing: 4px;
+				color: var(--text-dim);
+				transition: color 0.3s;
+			}
+
+			.active-player .active-indicator {
+				color: var(--accent-red);
+				font-weight: 700;
+				text-shadow: 0 0 10px rgba(217, 4, 41, 0.5);
+			}
+
+			.active-player .player-title {
+				color: var(--surface-light);
+			}
+
+			/* 棋子墓地 (被吃的棋子) */
+			.graveyard {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 5px;
+				max-width: 200px;
+				min-height: 80px;
+				font-size: 1.8rem;
+				color: var(--text-dim);
+				opacity: 0.8;
+				align-content: flex-start;
+			}
+
+			.panel.left .graveyard {
+				justify-content: flex-end;
+			}
+
+			/* 中间棋盘容器 */
+			.board-wrapper {
+				position: relative;
+				background-color: var(--surface-dark);
+				padding: 20px;
+				border: 2px solid var(--board-border);
+				box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+				z-index: 5;
+			}
+
+			.board-wrapper::after {
+				content: '';
+				position: absolute;
+				top: 6px;
+				left: 6px;
+				right: 6px;
+				bottom: 6px;
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				pointer-events: none;
+			}
+
+			/* 棋盘 Grid */
+			#chessboard {
+				display: grid;
+				grid-template-columns: repeat(8, 70px);
+				grid-template-rows: repeat(8, 70px);
+				border: 4px solid var(--surface-light);
+				background-color: var(--board-dark);
+				position: relative;
+			}
+
+			.square {
+				width: 70px;
+				height: 70px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-size: 3.5rem;
+				cursor: pointer;
+				position: relative;
+				transition:
+					background-color 0.2s,
+					filter 0.2s;
+			}
+
+			.square.light {
+				background-color: var(--board-light);
+			}
+			.square.dark {
+				background-color: var(--board-dark);
+			}
+
+			/* 棋子样式 */
+			.piece {
+				cursor: pointer;
+				z-index: 2;
+				transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+				/* 使用粗黑和纯白来区分阵营，并带有强烈的阴影 */
+				filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.6));
+			}
+
+			.piece.white {
+				color: #ffffff;
+				text-shadow: 0 2px 0px #999;
+			}
+			.piece.black {
+				color: #111111;
+				text-shadow: 0 2px 0px #000;
+			}
+
+			.piece:hover {
+				transform: scale(1.15) translateY(-4px);
+			}
+
+			/* 交互高亮 */
+			.square.selected::before {
+				content: '';
+				position: absolute;
+				inset: 0;
+				border: 4px solid var(--accent-red);
+				background: rgba(217, 4, 41, 0.2);
+				z-index: 1;
+			}
+
+			.square.valid-move::after {
+				content: '';
+				position: absolute;
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background-color: var(--accent-red);
+				opacity: 0.6;
+				z-index: 1;
+				transition: transform 0.2s;
+			}
+
+			.square.valid-move:hover::after {
+				transform: scale(1.5);
+			}
+
+			.square.valid-capture::after {
+				content: '';
+				position: absolute;
+				inset: 0;
+				border: 6px solid var(--accent-red);
+				background-color: transparent;
+				opacity: 0.8;
+				border-radius: 0;
+				width: 100%;
+				height: 100%;
+			}
+
+			/* 坐标标识 (A-H, 1-8) */
+			.coord {
+				position: absolute;
+				font-size: 10px;
+				font-weight: 700;
+				color: rgba(255, 255, 255, 0.5);
+				pointer-events: none;
+				z-index: 3;
+			}
+			.square.light .coord {
+				color: rgba(0, 0, 0, 0.4);
+			}
+
+			.coord.rank {
+				top: 4px;
+				left: 4px;
+			}
+			.coord.file {
+				bottom: 4px;
+				right: 4px;
+			}
+
+			/* 控制区 */
+			.controls {
+				display: flex;
+				flex-direction: column;
+				gap: 15px;
+				margin-top: auto;
+			}
+
+			.status-msg {
+				font-family: 'Noto Serif SC', serif;
+				font-size: 1.5rem;
+				color: var(--accent-red);
+				height: 2rem;
+			}
+
+			button {
+				background: transparent;
+				color: var(--text-pure);
+				border: 1px solid var(--text-dim);
+				padding: 12px 24px;
+				font-family: inherit;
+				font-size: 0.9rem;
+				letter-spacing: 2px;
+				cursor: pointer;
+				transition: all 0.3s;
+				text-transform: uppercase;
+			}
+
+			button:hover {
+				background: var(--text-pure);
+				color: var(--bg-noir);
+				border-color: var(--text-pure);
+			}
+
+			/* 游戏结束弹窗 */
+			.modal-overlay {
+				position: fixed;
+				inset: 0;
+				background: rgba(10, 10, 10, 0.9);
+				backdrop-filter: blur(8px);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.5s;
+				z-index: 100;
+			}
+
+			.modal-overlay.active {
+				opacity: 1;
+				pointer-events: all;
+			}
+
+			.modal-content {
+				text-align: center;
+				transform: translateY(20px);
+				transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+			}
+
+			.modal-overlay.active .modal-content {
+				transform: translateY(0);
+			}
+
+			.modal-content h2 {
+				font-family: 'Noto Serif SC', serif;
+				font-size: 5rem;
+				font-weight: 900;
+				color: var(--surface-light);
+				margin-bottom: 20px;
+				letter-spacing: 8px;
+			}
+
+			.modal-content p {
+				font-size: 1.2rem;
+				color: var(--accent-red);
+				letter-spacing: 4px;
+				margin-bottom: 40px;
+			}
+
+			@media (max-width: 1024px) {
+				.layout {
+					flex-direction: column;
+					align-items: center;
+					padding: 20px;
+					gap: 30px;
+				}
+				.panel {
+					text-align: center !important;
+					align-items: center !important;
+				}
+				.panel.left .graveyard {
+					justify-content: center;
+				}
+				#chessboard {
+					grid-template-columns: repeat(8, 45px);
+					grid-template-rows: repeat(8, 45px);
+				}
+				.square {
+					width: 45px;
+					height: 45px;
+					font-size: 2.2rem;
+				}
+				.player-title {
+					font-size: 2rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="ambient-text">CHECKMATE</div>
+
+		<div class="layout">
+			<!-- Black Player Info (Left Side) -->
+			<aside class="panel left" id="panel-b">
+				<div class="player-info">
+					<span class="active-indicator">黑方序列</span>
+					<h2 class="player-title">黑 方</h2>
+				</div>
+				<!-- Captured by Black (White pieces) -->
+				<div class="graveyard" id="grave-b"></div>
+			</aside>
+
+			<!-- Board -->
+			<main class="board-wrapper">
+				<div id="chessboard">
+					<!-- Squares injected by JS -->
+				</div>
+			</main>
+
+			<!-- White Player Info (Right Side) -->
+			<aside class="panel right" id="panel-w">
+				<div class="player-info">
+					<span class="active-indicator">白方序列</span>
+					<h2 class="player-title">白 方</h2>
+				</div>
+				<!-- Captured by White (Black pieces) -->
+				<div class="graveyard" id="grave-w"></div>
+
+				<div class="controls">
+					<div class="status-msg" id="status-msg"></div>
+					<button onclick="resetGame()">重新开局</button>
+					<button onclick="undoMove()">悔棋 (Undo)</button>
+				</div>
+			</aside>
+		</div>
+
+		<!-- Game Over Modal -->
+		<div class="modal-overlay" id="modal">
+			<div class="modal-content">
+				<h2 id="modal-title">将 杀</h2>
+				<p id="modal-desc">白方胜</p>
+				<button onclick="resetGame()" style="background: var(--accent-red); color: #fff; border: none; padding: 15px 40px; font-weight: 700">再弈一局</button>
+			</div>
+		</div>
+
+		<script>
+			// Use chess.js for logic
+			const game = new Chess()
+			const boardEl = document.getElementById('chessboard')
+			const statusMsgEl = document.getElementById('status-msg')
+			const modal = document.getElementById('modal')
+			const modalTitle = document.getElementById('modal-title')
+			const modalDesc = document.getElementById('modal-desc')
+
+			// Unicode pieces mapping (filled versions for solid brutalist look)
+			const PIECE_MAP = {
+				p: '♟',
+				n: '♞',
+				b: '♝',
+				r: '♜',
+				q: '♛',
+				k: '♚'
+			}
+
+			let selectedSquare = null
+			let validMoves = []
+			let capturedWhite = []
+			let capturedBlack = []
+
+			// Initialize Board DOM
+			function initBoardDOM() {
+				boardEl.innerHTML = ''
+				const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+
+				for (let r = 8; r >= 1; r--) {
+					for (let c = 0; c < 8; c++) {
+						const file = files[c]
+						const squareId = file + r
+						const isLight = (r + c) % 2 !== 0
+
+						const squareEl = document.createElement('div')
+						squareEl.className = `square ${isLight ? 'light' : 'dark'}`
+						squareEl.dataset.sq = squareId
+
+						// Coordinates labels on edges
+						if (c === 0) {
+							const rankEl = document.createElement('span')
+							rankEl.className = 'coord rank'
+							rankEl.textContent = r
+							squareEl.appendChild(rankEl)
+						}
+						if (r === 1) {
+							const fileEl = document.createElement('span')
+							fileEl.className = 'coord file'
+							fileEl.textContent = file
+							squareEl.appendChild(fileEl)
+						}
+
+						squareEl.addEventListener('click', () => handleSquareClick(squareId))
+						boardEl.appendChild(squareEl)
+					}
+				}
+				updateBoard()
+			}
+
+			function updateBoard() {
+				// Clear all pieces and highlights
+				document.querySelectorAll('.square').forEach(sq => {
+					const pieceEl = sq.querySelector('.piece')
+					if (pieceEl) pieceEl.remove()
+					sq.classList.remove('selected', 'valid-move', 'valid-capture')
+				})
+
+				// Place pieces based on current state
+				const board = game.board()
+				const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+
+				for (let r = 0; r < 8; r++) {
+					for (let c = 0; c < 8; c++) {
+						const piece = board[r][c]
+						if (piece) {
+							const squareId = files[c] + (8 - r)
+							const squareEl = document.querySelector(`.square[data-sq="${squareId}"]`)
+
+							const pieceEl = document.createElement('div')
+							pieceEl.className = `piece ${piece.color === 'w' ? 'white' : 'black'}`
+							pieceEl.textContent = PIECE_MAP[piece.type]
+							squareEl.appendChild(pieceEl)
+						}
+					}
+				}
+
+				// Highlight selected
+				if (selectedSquare) {
+					const sq = document.querySelector(`.square[data-sq="${selectedSquare}"]`)
+					if (sq) sq.classList.add('selected')
+
+					// Highlight moves
+					validMoves.forEach(move => {
+						const targetSq = document.querySelector(`.square[data-sq="${move.to}"]`)
+						if (targetSq) {
+							if (move.flags.includes('c') || move.flags.includes('e')) {
+								targetSq.classList.add('valid-capture')
+							} else {
+								targetSq.classList.add('valid-move')
+							}
+						}
+					})
+				}
+
+				updateStatus()
+				updateGraveyards()
+			}
+
+			function handleSquareClick(squareId) {
+				if (game.game_over()) return
+
+				const isMove = validMoves.find(m => m.to === squareId)
+
+				if (isMove) {
+					// Execute move
+					// Auto promote to Queen for simplicity
+					let moveParams = {
+						from: selectedSquare,
+						to: squareId,
+						promotion: 'q'
+					}
+
+					const moveResult = game.move(moveParams)
+					if (moveResult) {
+						if (moveResult.captured) {
+							if (moveResult.color === 'w') capturedBlack.push(moveResult.captured)
+							else capturedWhite.push(moveResult.captured)
+						}
+					}
+
+					selectedSquare = null
+					validMoves = []
+				} else {
+					// Select piece
+					const piece = game.get(squareId)
+					if (piece && piece.color === game.turn()) {
+						selectedSquare = squareId
+						validMoves = game.moves({ square: squareId, verbose: true })
+					} else {
+						selectedSquare = null
+						validMoves = []
+					}
+				}
+				updateBoard()
+			}
+
+			function updateStatus() {
+				const turnColor = game.turn() === 'w' ? '白方' : '黑方'
+				let status = ''
+
+				document.getElementById('panel-w').classList.toggle('active-player', game.turn() === 'w')
+				document.getElementById('panel-b').classList.toggle('active-player', game.turn() === 'b')
+
+				if (game.in_checkmate()) {
+					status = `将杀！`
+					showModal('将 杀', `${game.turn() === 'w' ? '黑方' : '白方'} 胜`)
+				} else if (game.in_draw()) {
+					status = '和棋'
+					showModal('和 棋', '双方平局')
+				} else {
+					if (game.in_check()) {
+						status = '将军！'
+					}
+				}
+				statusMsgEl.textContent = status
+			}
+
+			function updateGraveyards() {
+				const wGrave = document.getElementById('grave-w')
+				const bGrave = document.getElementById('grave-b')
+
+				// grave-w shows pieces captured BY white (which are black pieces)
+				wGrave.innerHTML = capturedBlack.map(p => `<span class="piece black">${PIECE_MAP[p]}</span>`).join('')
+
+				// grave-b shows pieces captured BY black (which are white pieces)
+				bGrave.innerHTML = capturedWhite.map(p => `<span class="piece white">${PIECE_MAP[p]}</span>`).join('')
+			}
+
+			function showModal(title, desc) {
+				modalTitle.textContent = title
+				modalDesc.textContent = desc
+				modal.classList.add('active')
+			}
+
+			function resetGame() {
+				game.reset()
+				selectedSquare = null
+				validMoves = []
+				capturedWhite = []
+				capturedBlack = []
+				modal.classList.remove('active')
+				updateBoard()
+			}
+
+			function undoMove() {
+				const move = game.undo()
+				if (move) {
+					// Also undo captured pieces lists
+					if (move.captured) {
+						if (move.color === 'w') capturedBlack.pop()
+						else capturedWhite.pop()
+					}
+					selectedSquare = null
+					validMoves = []
+					updateBoard()
+				}
+			}
+
+			// Boot
+			initBoardDOM()
+		</script>
+	</body>
+</html>

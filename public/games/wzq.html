@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<title>五子棋 - 禅意对局</title>
+		<link rel="icon" href="/favicon.png" />
+		<style>
+			@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&display=swap');
+
+			:root {
+				--bg-color: #050505;
+				--text-color: #e0e0e0;
+				--glass-bg: rgba(20, 20, 25, 0.4);
+				--glass-border: rgba(255, 255, 255, 0.08);
+				--accent: #d4b895;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				background-color: var(--bg-color);
+				color: var(--text-color);
+				font-family: 'Noto Serif SC', serif;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				overflow: hidden;
+				position: relative;
+				user-select: none;
+			}
+
+			/* Ambient animated background lights */
+			.ambient-light {
+				position: absolute;
+				border-radius: 50%;
+				filter: blur(90px);
+				opacity: 0.4;
+				z-index: -1;
+				animation: float 20s infinite ease-in-out alternate;
+			}
+
+			.light-1 {
+				width: 50vw;
+				height: 50vw;
+				background: radial-gradient(circle, rgba(50, 60, 90, 0.8) 0%, rgba(0, 0, 0, 0) 70%);
+				top: -10%;
+				left: -10%;
+			}
+
+			.light-2 {
+				width: 60vw;
+				height: 60vw;
+				background: radial-gradient(circle, rgba(120, 90, 60, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
+				bottom: -20%;
+				right: -10%;
+				animation-delay: -7s;
+			}
+
+			@keyframes float {
+				0% {
+					transform: translate(0, 0) scale(1);
+				}
+				100% {
+					transform: translate(5%, 5%) scale(1.1);
+				}
+			}
+
+			#game-wrapper {
+				position: relative;
+				z-index: 10;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 25px;
+				padding: 40px;
+				background: var(--glass-bg);
+				backdrop-filter: blur(24px);
+				-webkit-backdrop-filter: blur(24px);
+				border: 1px solid var(--glass-border);
+				border-radius: 24px;
+				box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
+				animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+				opacity: 0;
+				transform: translateY(20px);
+			}
+
+			@keyframes fadeInUp {
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.header {
+				text-align: center;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			h1 {
+				margin: 0;
+				font-size: 2.2rem;
+				font-weight: 300;
+				letter-spacing: 12px;
+				color: var(--accent);
+				text-shadow: 0 0 20px rgba(212, 184, 149, 0.3);
+				padding-left: 12px; /* balance letter spacing */
+			}
+
+			#status {
+				font-size: 1.1rem;
+				font-weight: 300;
+				letter-spacing: 4px;
+				transition:
+					color 0.3s ease,
+					text-shadow 0.3s ease;
+				height: 24px;
+			}
+
+			.status-black {
+				color: #aaaaaa;
+			}
+			.status-white {
+				color: #ffffff;
+				text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+			}
+
+			.board-container {
+				position: relative;
+				border-radius: 12px;
+				padding: 10px;
+				background: rgba(0, 0, 0, 0.2);
+				border: 1px solid var(--glass-border);
+				box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+			}
+
+			canvas {
+				display: block;
+				cursor: pointer;
+				border-radius: 8px;
+			}
+
+			#overlay {
+				position: absolute;
+				inset: 0;
+				background: rgba(10, 10, 12, 0.85);
+				backdrop-filter: blur(8px);
+				-webkit-backdrop-filter: blur(8px);
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+				border-radius: 12px;
+				z-index: 20;
+			}
+
+			#overlay.show {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			#win-msg {
+				font-size: 2.8rem;
+				font-weight: 700;
+				margin-bottom: 40px;
+				letter-spacing: 8px;
+				padding-left: 8px;
+				background: linear-gradient(135deg, #f0e6d2, #b39b7d);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				text-shadow: 0 10px 30px rgba(212, 184, 149, 0.2);
+			}
+
+			.btn-container {
+				display: flex;
+				gap: 20px;
+				width: 100%;
+				justify-content: center;
+			}
+
+			button {
+				background: transparent;
+				color: var(--text-color);
+				border: 1px solid rgba(255, 255, 255, 0.2);
+				padding: 12px 35px;
+				font-family: inherit;
+				font-size: 1rem;
+				letter-spacing: 4px;
+				border-radius: 40px;
+				cursor: pointer;
+				transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+				position: relative;
+				overflow: hidden;
+				z-index: 1;
+			}
+
+			button::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: var(--text-color);
+				opacity: 0;
+				transition: opacity 0.4s ease;
+				z-index: -1;
+			}
+
+			button:hover {
+				color: var(--bg-color);
+				border-color: var(--text-color);
+				box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+				transform: translateY(-2px);
+			}
+
+			button:hover::before {
+				opacity: 1;
+			}
+
+			button:active {
+				transform: translateY(0);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="ambient-light light-1"></div>
+		<div class="ambient-light light-2"></div>
+
+		<div id="game-wrapper">
+			<div class="header">
+				<h1>五子棋</h1>
+				<div id="status" class="status-black">黑方回合</div>
+			</div>
+
+			<div class="board-container">
+				<canvas id="board" width="480" height="480"></canvas>
+				<div id="overlay">
+					<div id="win-msg">黑方胜</div>
+					<button id="overlayRestartBtn">再局一次</button>
+				</div>
+			</div>
+
+			<div class="btn-container">
+				<button id="restartBtn">重新开始</button>
+			</div>
+		</div>
+
+		<script>
+			const canvas = document.getElementById('board')
+			const ctx = canvas.getContext('2d')
+			const statusDiv = document.getElementById('status')
+			const restartBtn = document.getElementById('restartBtn')
+			const overlayRestartBtn = document.getElementById('overlayRestartBtn')
+			const overlay = document.getElementById('overlay')
+			const winMsg = document.getElementById('win-msg')
+
+			const gridSize = 30
+			const boardSize = 15
+			const padding = 30
+
+			let board = []
+			let currentPlayer = 1
+			let gameOver = false
+			let hoverPos = null
+			let winningLine = null
+
+			function initBoard() {
+				board = Array.from({ length: boardSize }, () => Array(boardSize).fill(0))
+				currentPlayer = 1
+				gameOver = false
+				hoverPos = null
+				winningLine = null
+
+				overlay.classList.remove('show')
+				statusDiv.innerText = '黑方回合'
+				statusDiv.className = 'status-black'
+				statusDiv.style.color = ''
+
+				drawBoard()
+			}
+
+			function drawBoard() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+				// Draw grid
+				ctx.beginPath()
+				ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)'
+				ctx.lineWidth = 1
+
+				for (let i = 0; i < boardSize; i++) {
+					ctx.moveTo(padding, padding + i * gridSize)
+					ctx.lineTo(padding + (boardSize - 1) * gridSize, padding + i * gridSize)
+					ctx.moveTo(padding + i * gridSize, padding)
+					ctx.lineTo(padding + i * gridSize, padding + (boardSize - 1) * gridSize)
+				}
+				ctx.stroke()
+
+				// Draw stars
+				const stars = [
+					[3, 3],
+					[11, 3],
+					[3, 11],
+					[11, 11],
+					[7, 7]
+				]
+				ctx.fillStyle = 'rgba(255, 255, 255, 0.25)'
+				stars.forEach(pos => {
+					ctx.beginPath()
+					ctx.arc(padding + pos[0] * gridSize, padding + pos[1] * gridSize, 3.5, 0, 2 * Math.PI)
+					ctx.fill()
+				})
+
+				// Draw pieces
+				for (let i = 0; i < boardSize; i++) {
+					for (let j = 0; j < boardSize; j++) {
+						if (board[i][j] !== 0) {
+							drawPiece(i, j, board[i][j])
+						}
+					}
+				}
+
+				// Draw hover indicator
+				if (hoverPos && !gameOver) {
+					drawPiece(hoverPos.row, hoverPos.col, currentPlayer, true)
+				}
+
+				// Draw winning line highlight
+				if (winningLine) {
+					ctx.save()
+					ctx.beginPath()
+					const start = winningLine[0]
+					const end = winningLine[winningLine.length - 1]
+					ctx.moveTo(padding + start.col * gridSize, padding + start.row * gridSize)
+					ctx.lineTo(padding + end.col * gridSize, padding + end.row * gridSize)
+					ctx.strokeStyle = 'rgba(212, 184, 149, 0.9)'
+					ctx.lineWidth = 3
+					ctx.lineCap = 'round'
+					ctx.shadowColor = 'rgba(212, 184, 149, 0.8)'
+					ctx.shadowBlur = 12
+					ctx.stroke()
+					ctx.restore()
+				}
+			}
+
+			function drawPiece(row, col, player, isHover = false) {
+				const x = padding + col * gridSize
+				const y = padding + row * gridSize
+
+				ctx.save()
+
+				if (!isHover) {
+					ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
+					ctx.shadowBlur = 6
+					ctx.shadowOffsetX = 2
+					ctx.shadowOffsetY = 4
+				}
+
+				ctx.beginPath()
+				ctx.arc(x, y, 12.5, 0, 2 * Math.PI)
+
+				if (isHover) {
+					ctx.fillStyle = player === 1 ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)'
+					ctx.fill()
+					ctx.strokeStyle = player === 1 ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)'
+					ctx.lineWidth = 1
+					ctx.stroke()
+				} else {
+					const gradient = ctx.createRadialGradient(x - 4, y - 4, 1, x, y, 13)
+
+					if (player === 1) {
+						gradient.addColorStop(0, '#4a4a4a')
+						gradient.addColorStop(0.3, '#151515')
+						gradient.addColorStop(1, '#000000')
+					} else {
+						gradient.addColorStop(0, '#ffffff')
+						gradient.addColorStop(0.4, '#e8e8e8')
+						gradient.addColorStop(1, '#999999')
+					}
+
+					ctx.fillStyle = gradient
+					ctx.fill()
+
+					ctx.strokeStyle = player === 1 ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.9)'
+					ctx.lineWidth = 0.5
+					ctx.stroke()
+				}
+
+				ctx.restore()
+			}
+
+			function checkWin(row, col, player) {
+				const directions = [
+					[
+						[0, -1],
+						[0, 1]
+					],
+					[
+						[-1, 0],
+						[1, 0]
+					],
+					[
+						[-1, -1],
+						[1, 1]
+					],
+					[
+						[-1, 1],
+						[1, -1]
+					]
+				]
+
+				for (let dir of directions) {
+					let count = 1
+					let winLine = [{ row, col }]
+
+					for (let step of dir) {
+						let r = row + step[0]
+						let c = col + step[1]
+						while (r >= 0 && r < boardSize && c >= 0 && c < boardSize && board[r][c] === player) {
+							count++
+							winLine.push({ row: r, col: c })
+							r += step[0]
+							c += step[1]
+						}
+					}
+					if (count >= 5) {
+						winLine.sort((a, b) => a.row - b.row || a.col - b.col)
+						return winLine
+					}
+				}
+				return null
+			}
+
+			canvas.addEventListener('mousemove', e => {
+				if (gameOver) return
+				const rect = canvas.getBoundingClientRect()
+				const x = e.clientX - rect.left
+				const y = e.clientY - rect.top
+
+				const col = Math.round((x - padding) / gridSize)
+				const row = Math.round((y - padding) / gridSize)
+
+				if (row >= 0 && row < boardSize && col >= 0 && col < boardSize && board[row][col] === 0) {
+					if (!hoverPos || hoverPos.row !== row || hoverPos.col !== col) {
+						hoverPos = { row, col }
+						drawBoard()
+					}
+				} else {
+					if (hoverPos !== null) {
+						hoverPos = null
+						drawBoard()
+					}
+				}
+			})
+
+			canvas.addEventListener('mouseleave', () => {
+				if (hoverPos !== null) {
+					hoverPos = null
+					drawBoard()
+				}
+			})
+
+			canvas.addEventListener('click', e => {
+				if (gameOver) return
+
+				const rect = canvas.getBoundingClientRect()
+				const x = e.clientX - rect.left
+				const y = e.clientY - rect.top
+
+				const col = Math.round((x - padding) / gridSize)
+				const row = Math.round((y - padding) / gridSize)
+
+				if (row >= 0 && row < boardSize && col >= 0 && col < boardSize && board[row][col] === 0) {
+					board[row][col] = currentPlayer
+					hoverPos = null
+
+					const winResult = checkWin(row, col, currentPlayer)
+					if (winResult) {
+						gameOver = true
+						winningLine = winResult
+						drawBoard()
+
+						winMsg.innerText = currentPlayer === 1 ? '黑方 胜' : '白方 胜'
+						overlay.classList.add('show')
+
+						statusDiv.innerText = '对局结束'
+						statusDiv.className = ''
+						statusDiv.style.color = 'var(--accent)'
+					} else {
+						currentPlayer = currentPlayer === 1 ? 2 : 1
+						statusDiv.innerText = currentPlayer === 1 ? '黑方回合' : '白方回合'
+						statusDiv.className = currentPlayer === 1 ? 'status-black' : 'status-white'
+						drawBoard()
+					}
+				}
+			})
+
+			restartBtn.addEventListener('click', initBoard)
+			overlayRestartBtn.addEventListener('click', initBoard)
+
+			initBoard()
+		</script>
+	</body>
+</html>

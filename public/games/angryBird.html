@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>抛体实验 // KINETIC_TEST</title>
+		<link rel="icon" href="/favicon.png" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+SC:wght@700;900&family=JetBrains+Mono:wght@800&display=swap"
+			rel="stylesheet" />
+		<!-- 引入 Matter.js 物理引擎 -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+		<style>
+			:root {
+				--bg-color: #e2e8f0;
+				--ink: #0f172a;
+				--grid-dot: #94a3b8;
+				--accent-red: #ef4444; /* Bird */
+				--accent-green: #10b981; /* Pig */
+				--accent-yellow: #fbbf24; /* Block */
+				--accent-blue: #3b82f6; /* Slingshot */
+				--shadow: 8px 8px 0px var(--ink);
+			}
+
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+				user-select: none;
+			}
+
+			body {
+				background-color: var(--bg-color);
+				color: var(--ink);
+				font-family: 'Noto Sans SC', 'JetBrains Mono', sans-serif;
+				min-height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				overflow: hidden;
+				/* 工业蓝图点阵背景 */
+				background-image: radial-gradient(var(--grid-dot) 2px, transparent 2px);
+				background-size: 30px 30px;
+			}
+
+			.layout {
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+				width: 100%;
+				max-width: 1000px;
+				padding: 20px;
+			}
+
+			/* 顶部 HUD 面板 */
+			.hud-panel {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-end;
+				background: #fff;
+				border: 4px solid var(--ink);
+				padding: 20px 30px;
+				box-shadow: var(--shadow);
+				position: relative;
+			}
+
+			/* 左上角危险警示条 */
+			.hud-panel::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 6px;
+				background: repeating-linear-gradient(45deg, var(--accent-yellow), var(--accent-yellow) 10px, var(--ink) 10px, var(--ink) 20px);
+			}
+
+			.title-block h1 {
+				font-family: 'Bebas Neue', sans-serif;
+				font-size: 4rem;
+				line-height: 0.9;
+				color: var(--ink);
+				letter-spacing: 2px;
+			}
+
+			.title-block span {
+				font-weight: 900;
+				font-size: 1rem;
+				background: var(--ink);
+				color: #fff;
+				padding: 4px 10px;
+				text-transform: uppercase;
+				letter-spacing: 4px;
+				display: inline-block;
+				margin-top: 5px;
+			}
+
+			.stats-group {
+				display: flex;
+				gap: 30px;
+			}
+
+			.stat-box {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+			}
+
+			.stat-label {
+				font-size: 0.8rem;
+				font-weight: 900;
+				color: var(--accent-blue);
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				margin-bottom: 4px;
+			}
+
+			.stat-value {
+				font-family: 'JetBrains Mono', monospace;
+				font-size: 2.5rem;
+				font-weight: 800;
+				line-height: 1;
+				text-shadow: 2px 2px 0px var(--grid-dot);
+			}
+
+			/* 画布容器 */
+			.canvas-container {
+				position: relative;
+				width: 100%;
+				background: #fff;
+				border: 6px solid var(--ink);
+				box-shadow: 12px 12px 0px var(--ink);
+				overflow: hidden;
+				cursor: crosshair;
+			}
+
+			canvas {
+				display: block;
+				width: 100%;
+				height: auto;
+				/* 背景为细格纹 */
+				background-color: #f8fafc;
+				background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+				background-size: 20px 20px;
+			}
+
+			/* 控制说明 */
+			.controls-info {
+				display: flex;
+				justify-content: space-between;
+				font-size: 0.9rem;
+				font-weight: 700;
+				color: #475569;
+				background: #fff;
+				border: 2px solid var(--ink);
+				padding: 10px 20px;
+				box-shadow: 4px 4px 0px var(--ink);
+			}
+
+			.btn {
+				background: var(--ink);
+				color: #fff;
+				border: none;
+				padding: 6px 15px;
+				font-family: inherit;
+				font-weight: 900;
+				cursor: pointer;
+				transition: transform 0.1s;
+			}
+
+			.btn:hover {
+				background: var(--accent-red);
+			}
+			.btn:active {
+				transform: translateY(2px);
+			}
+
+			/* 游戏结束覆盖层 */
+			.overlay {
+				position: absolute;
+				inset: 0;
+				background: rgba(226, 232, 240, 0.9);
+				backdrop-filter: blur(4px);
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				z-index: 100;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.3s;
+			}
+
+			.overlay.active {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			.overlay-box {
+				background: #fff;
+				border: 6px solid var(--ink);
+				padding: 40px 60px;
+				box-shadow: 16px 16px 0px var(--ink);
+				text-align: center;
+				transform: translateY(50px);
+				transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+			}
+
+			.overlay.active .overlay-box {
+				transform: translateY(0);
+			}
+
+			.overlay h2 {
+				font-size: 4rem;
+				font-weight: 900;
+				color: var(--ink);
+				margin-bottom: 10px;
+				line-height: 1;
+			}
+
+			.overlay.win h2 {
+				color: var(--accent-green);
+				text-shadow: 4px 4px 0px var(--ink);
+			}
+			.overlay.lose h2 {
+				color: var(--accent-red);
+				text-shadow: 4px 4px 0px var(--ink);
+			}
+
+			.overlay p {
+				font-size: 1.2rem;
+				font-weight: 700;
+				color: #64748b;
+				margin-bottom: 30px;
+			}
+
+			.big-btn {
+				background: var(--accent-yellow);
+				color: var(--ink);
+				border: 4px solid var(--ink);
+				padding: 15px 40px;
+				font-family: inherit;
+				font-weight: 900;
+				font-size: 1.5rem;
+				cursor: pointer;
+				box-shadow: 6px 6px 0px var(--ink);
+				transition: all 0.1s;
+				text-transform: uppercase;
+			}
+
+			.big-btn:hover {
+				transform: translate(2px, 2px);
+				box-shadow: 4px 4px 0px var(--ink);
+				background: #fde047;
+			}
+
+			.big-btn:active {
+				transform: translate(6px, 6px);
+				box-shadow: 0px 0px 0px var(--ink);
+			}
+
+			/* 屏幕震动 */
+			@keyframes shake {
+				0% {
+					transform: translate(1px, 1px) rotate(0deg);
+				}
+				10% {
+					transform: translate(-1px, -2px) rotate(-1deg);
+				}
+				20% {
+					transform: translate(-3px, 0px) rotate(1deg);
+				}
+				30% {
+					transform: translate(3px, 2px) rotate(0deg);
+				}
+				40% {
+					transform: translate(1px, -1px) rotate(1deg);
+				}
+				50% {
+					transform: translate(-1px, 2px) rotate(-1deg);
+				}
+				60% {
+					transform: translate(-3px, 1px) rotate(0deg);
+				}
+				70% {
+					transform: translate(3px, 1px) rotate(-1deg);
+				}
+				80% {
+					transform: translate(-1px, -1px) rotate(1deg);
+				}
+				90% {
+					transform: translate(1px, 2px) rotate(0deg);
+				}
+				100% {
+					transform: translate(1px, -2px) rotate(-1deg);
+				}
+			}
+			.shake-active {
+				animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="layout">
+			<!-- HUD -->
+			<header class="hud-panel">
+				<div class="title-block">
+					<h1>PROJECTILE</h1>
+					<span>抛体破坏实验</span>
+				</div>
+				<div class="stats-group">
+					<div class="stat-box">
+						<span class="stat-label">剩余弹药</span>
+						<span class="stat-value" id="birds-ui" style="color: var(--accent-red)">3</span>
+					</div>
+					<div class="stat-box">
+						<span class="stat-label">存活目标</span>
+						<span class="stat-value" id="pigs-ui" style="color: var(--accent-green)">3</span>
+					</div>
+					<div class="stat-box">
+						<span class="stat-label">破坏得分</span>
+						<span class="stat-value" id="score-ui">0</span>
+					</div>
+				</div>
+			</header>
+
+			<!-- Game Area -->
+			<main class="canvas-container" id="canvas-wrapper">
+				<canvas id="gameCanvas" width="900" height="500"></canvas>
+
+				<div class="overlay" id="overlay">
+					<div class="overlay-box">
+						<h2 id="overlay-title">实验完成</h2>
+						<p id="overlay-desc">目标已被全部摧毁。</p>
+						<button class="big-btn" onclick="initGame()">重新部署</button>
+					</div>
+				</div>
+			</main>
+
+			<!-- Controls footer -->
+			<footer class="controls-info">
+				<div>操作手册: 拖拽红色实验体 -> 瞄准 -> 松开以发射。摧毁所有绿色目标块。</div>
+				<button class="btn" onclick="initGame()">强制重置</button>
+			</footer>
+		</div>
+
+		<script>
+			// Matter.js modules
+			const Engine = Matter.Engine,
+				Render = Matter.Render,
+				Runner = Matter.Runner,
+				Bodies = Matter.Bodies,
+				Body = Matter.Body,
+				Composite = Matter.Composite,
+				Constraint = Matter.Constraint,
+				Mouse = Matter.Mouse,
+				MouseConstraint = Matter.MouseConstraint,
+				Events = Matter.Events
+
+			const canvas = document.getElementById('gameCanvas')
+			const ctx = canvas.getContext('2d')
+			const wrapper = document.getElementById('canvas-wrapper')
+
+			// UI Elements
+			const birdsUi = document.getElementById('birds-ui')
+			const pigsUi = document.getElementById('pigs-ui')
+			const scoreUi = document.getElementById('score-ui')
+			const overlay = document.getElementById('overlay')
+			const overlayTitle = document.getElementById('overlay-title')
+			const overlayDesc = document.getElementById('overlay-desc')
+
+			let engine, runner, mouse, mouseConstraint
+			let bird, sling
+			const anchor = { x: 280, y: 320 } // Moved right and up
+
+			// Game State
+			let birdsLeft = 3
+			let pigsCount = 0
+			let score = 0
+			let isFlying = false
+			let isGameOver = false
+			let turnTimeout = null
+			let particles = []
+			let pigsToDestroy = []
+
+			// Colors mapped
+			const C = {
+				bird: '#EF4444',
+				pig: '#10B981',
+				block: '#FBBF24',
+				ground: '#0F172A',
+				line: '#0F172A'
+			}
+
+			function initGame() {
+				// Cleanup previous engine if exists
+				if (engine) {
+					Matter.Runner.stop(runner)
+					Matter.Engine.clear(engine)
+				}
+				if (turnTimeout) clearTimeout(turnTimeout)
+
+				// Reset State
+				birdsLeft = 3
+				score = 0
+				pigsCount = 0
+				isFlying = false
+				isGameOver = false
+				particles = []
+				pigsToDestroy = []
+
+				updateHUD()
+				overlay.classList.remove('active', 'win', 'lose')
+
+				// Setup Engine
+				engine = Engine.create()
+
+				// Create Ground and Walls (Made wallLeft further out to not interfere)
+				const ground = Bodies.rectangle(450, 490, 900, 40, { isStatic: true, label: 'ground' })
+				const wallLeft = Bodies.rectangle(-50, 250, 40, 500, { isStatic: true })
+				const wallRight = Bodies.rectangle(950, 250, 40, 500, { isStatic: true })
+
+				// Build Structure (Pigs and Blocks) - Shifted right by 50px
+				const structure = []
+
+				// Base layer
+				structure.push(Bodies.rectangle(650, 440, 30, 60, { label: 'block' }))
+				structure.push(Bodies.rectangle(750, 440, 30, 60, { label: 'block' }))
+				structure.push(Bodies.rectangle(850, 440, 30, 60, { label: 'block' }))
+
+				// Pigs layer 1
+				structure.push(createPig(700, 450))
+				structure.push(createPig(800, 450))
+
+				// Planks 1
+				structure.push(Bodies.rectangle(700, 400, 130, 20, { label: 'block' }))
+				structure.push(Bodies.rectangle(800, 400, 130, 20, { label: 'block' }))
+
+				// Layer 2
+				structure.push(Bodies.rectangle(700, 360, 30, 60, { label: 'block' }))
+				structure.push(Bodies.rectangle(800, 360, 30, 60, { label: 'block' }))
+
+				// Pig layer 2
+				structure.push(createPig(750, 360))
+
+				// Plank 2
+				structure.push(Bodies.rectangle(750, 320, 140, 20, { label: 'block' }))
+
+				// Top Block
+				structure.push(Bodies.rectangle(750, 280, 40, 40, { label: 'block' }))
+
+				pigsCount = 3
+				updateHUD()
+
+				// Setup Slingshot Base (Visual only)
+				const slingBase = Bodies.rectangle(280, 400, 20, 140, { isStatic: true, label: 'slingBase', isSensor: true })
+
+				Composite.add(engine.world, [ground, wallLeft, wallRight, slingBase, ...structure])
+
+				// Setup Mouse
+				mouse = Mouse.create(canvas)
+				// Increase the pixel ratio or sensor bounds for mouse to grab easier
+				mouseConstraint = MouseConstraint.create(engine, {
+					mouse: mouse,
+					constraint: {
+						stiffness: 0.1,
+						render: { visible: false }
+					}
+				})
+				// Extends the picking radius slightly via engine settings
+				mouseConstraint.collisionFilter.mask = 0x0001
+
+				Composite.add(engine.world, mouseConstraint)
+
+				// Load first bird
+				loadBird()
+
+				// Setup Events
+				setupEvents()
+
+				// Run
+				runner = Runner.create()
+				Runner.run(runner, engine)
+
+				// Custom Render Loop
+				requestAnimationFrame(draw)
+			}
+
+			function createPig(x, y) {
+				// Using a slightly chamfered rectangle for pig
+				return Bodies.rectangle(x, y, 36, 36, {
+					label: 'pig',
+					chamfer: { radius: 10 },
+					density: 0.002,
+					friction: 0.5,
+					restitution: 0.4
+				})
+			}
+
+			function loadBird() {
+				if (birdsLeft <= 0) {
+					checkGameEnd()
+					return
+				}
+
+				bird = Bodies.circle(anchor.x, anchor.y, 24, {
+					// Increased bird radius from 16 to 24
+					label: 'bird',
+					density: 0.006,
+					restitution: 0.6,
+					frictionAir: 0.01
+				})
+
+				sling = Constraint.create({
+					pointA: anchor,
+					bodyB: bird,
+					stiffness: 0.08,
+					damping: 0.1,
+					length: 10
+				})
+
+				Composite.add(engine.world, [bird, sling])
+				isFlying = false
+			}
+
+			function setupEvents() {
+				// Slingshot drag limit
+				Events.on(engine, 'beforeUpdate', function () {
+					if (sling.bodyB && mouseConstraint.body === bird) {
+						const maxDist = 250 // Increased drag radius
+						const dx = bird.position.x - anchor.x
+						const dy = bird.position.y - anchor.y
+						const dist = Math.hypot(dx, dy)
+						if (dist > maxDist) {
+							Body.setPosition(bird, {
+								x: anchor.x + (dx / dist) * maxDist,
+								y: anchor.y + (dy / dist) * maxDist
+							})
+						}
+					}
+				})
+
+				// Slingshot release
+				let wasDragged = false
+				Events.on(mouseConstraint, 'enddrag', function (e) {
+					if (e.body === bird) {
+						wasDragged = true
+					}
+				})
+
+				Events.on(engine, 'afterUpdate', function () {
+					// Remove constraint when bird passes anchor
+					if (wasDragged && sling.bodyB && bird.position.x > anchor.x + 10) {
+						sling.bodyB = null
+						wasDragged = false
+						isFlying = true
+						birdsLeft--
+						updateHUD()
+
+						// Turn ends after 6 seconds of flying
+						turnTimeout = setTimeout(() => {
+							checkTurnEnd()
+						}, 6000)
+					}
+
+					// Process pending destructions safely outside of collision loop
+					if (pigsToDestroy.length > 0) {
+						pigsToDestroy.forEach(pig => {
+							if (Composite.allBodies(engine.world).includes(pig)) {
+								createExplosion(pig.position.x, pig.position.y, C.pig)
+								Composite.remove(engine.world, pig)
+								pigsCount--
+								score += 500
+								screenShake()
+							}
+						})
+						pigsToDestroy = []
+						updateHUD()
+
+						if (pigsCount <= 0) {
+							if (turnTimeout) clearTimeout(turnTimeout)
+							setTimeout(checkGameEnd, 1000) // Slight delay for satisfaction
+						}
+					}
+				})
+
+				// Collision Damage
+				Events.on(engine, 'collisionStart', function (event) {
+					event.pairs.forEach(pair => {
+						const { bodyA, bodyB } = pair
+						// Calculate relative impact velocity
+						const relVelX = bodyA.velocity.x - bodyB.velocity.x
+						const relVelY = bodyA.velocity.y - bodyB.velocity.y
+						const impactSq = relVelX * relVelX + relVelY * relVelY
+
+						// If impact is hard enough
+						if (impactSq > 15) {
+							if (bodyA.label === 'pig' && !pigsToDestroy.includes(bodyA)) {
+								pigsToDestroy.push(bodyA)
+							}
+							if (bodyB.label === 'pig' && !pigsToDestroy.includes(bodyB)) {
+								pigsToDestroy.push(bodyB)
+							}
+
+							// Score for hitting blocks
+							if (bodyA.label === 'block' || bodyB.label === 'block') {
+								score += Math.floor(Math.sqrt(impactSq))
+								updateHUD()
+							}
+
+							// Spawn minor debris on hard impact
+							if (impactSq > 30) {
+								const px = bodyA.position.x + (bodyB.position.x - bodyA.position.x) / 2
+								const py = bodyA.position.y + (bodyB.position.y - bodyA.position.y) / 2
+								createExplosion(px, py, '#94A3B8', 3, 2)
+							}
+						}
+					})
+				})
+			}
+
+			function checkTurnEnd() {
+				if (isGameOver) return
+				// Remove current bird
+				if (bird && Composite.allBodies(engine.world).includes(bird)) {
+					Composite.remove(engine.world, bird)
+					createExplosion(bird.position.x, bird.position.y, '#fff', 5, 2)
+				}
+				bird = null
+
+				if (pigsCount > 0) {
+					loadBird() // Will check if out of birds inside
+				} else {
+					checkGameEnd()
+				}
+			}
+
+			function checkGameEnd() {
+				if (isGameOver) return
+
+				if (pigsCount <= 0) {
+					isGameOver = true
+					overlayTitle.textContent = '实验成功'
+					overlayTitle.style.color = 'var(--accent-green)'
+					overlayDesc.textContent = `所有目标已摧毁。最终得分: ${score}`
+					overlay.classList.add('active', 'win')
+				} else if (birdsLeft <= 0) {
+					isGameOver = true
+					overlayTitle.textContent = '实验失败'
+					overlayTitle.style.color = 'var(--accent-red)'
+					overlayDesc.textContent = `仍有 ${pigsCount} 个目标存活。`
+					overlay.classList.add('active', 'lose')
+				}
+			}
+
+			function updateHUD() {
+				birdsUi.textContent = birdsLeft
+				pigsUi.textContent = pigsCount
+				scoreUi.textContent = score
+			}
+
+			function screenShake() {
+				wrapper.classList.remove('shake-active')
+				void wrapper.offsetWidth // trigger reflow
+				wrapper.classList.add('shake-active')
+			}
+
+			function createExplosion(x, y, color, count = 10, maxSpeed = 5) {
+				for (let i = 0; i < count; i++) {
+					const angle = Math.random() * Math.PI * 2
+					const speed = Math.random() * maxSpeed
+					particles.push({
+						x: x,
+						y: y,
+						vx: Math.cos(angle) * speed,
+						vy: Math.sin(angle) * speed,
+						life: 1.0,
+						color: color,
+						size: Math.random() * 6 + 2
+					})
+				}
+			}
+
+			// Neo-Brutalist Rendering logic
+			function draw() {
+				if (!engine) return
+
+				ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+				// Draw Slingshot back strap (if attached)
+				if (sling && sling.bodyB) {
+					ctx.beginPath()
+					ctx.moveTo(anchor.x - 10, anchor.y)
+					ctx.lineTo(bird.position.x, bird.position.y)
+					ctx.lineWidth = 6
+					ctx.strokeStyle = C.line
+					ctx.stroke()
+				}
+
+				// Draw Bodies
+				const bodies = Composite.allBodies(engine.world)
+				for (let b of bodies) {
+					if (b.label === 'slingBase') {
+						// Draw custom slingshot base
+						ctx.fillStyle = C.accent_blue || '#3B82F6'
+						ctx.fillRect(b.position.x - 10, b.position.y - 40, 20, 80)
+						ctx.lineWidth = 4
+						ctx.strokeStyle = C.line
+						ctx.strokeRect(b.position.x - 10, b.position.y - 40, 20, 80)
+						continue
+					}
+
+					ctx.beginPath()
+					const vertices = b.vertices
+					ctx.moveTo(vertices[0].x, vertices[0].y)
+					for (let j = 1; j < vertices.length; j++) {
+						ctx.lineTo(vertices[j].x, vertices[j].y)
+					}
+					ctx.closePath()
+
+					// Styles based on label
+					if (b.label === 'bird') {
+						ctx.fillStyle = C.bird
+					} else if (b.label === 'pig') {
+						ctx.fillStyle = C.pig
+					} else if (b.label === 'block') {
+						ctx.fillStyle = C.block
+					} else if (b.label === 'ground') {
+						ctx.fillStyle = C.ground
+					} else {
+						ctx.fillStyle = '#ccc'
+					}
+
+					ctx.fill()
+
+					// Thick borders for brutalist look
+					if (b.label !== 'ground') {
+						ctx.lineWidth = 4
+						ctx.strokeStyle = C.line
+						ctx.stroke()
+					}
+
+					// Draw faces
+					if (b.label === 'bird') {
+						ctx.save()
+						ctx.translate(b.position.x, b.position.y)
+						ctx.rotate(b.angle)
+						// Angry eye visor
+						ctx.fillStyle = '#fff'
+						ctx.fillRect(2, -8, 10, 6)
+						ctx.fillStyle = '#000'
+						ctx.fillRect(6, -6, 4, 4)
+						ctx.restore()
+					} else if (b.label === 'pig') {
+						ctx.save()
+						ctx.translate(b.position.x, b.position.y)
+						ctx.rotate(b.angle)
+						// Two eyes
+						ctx.fillStyle = '#fff'
+						ctx.fillRect(-8, -6, 6, 6)
+						ctx.fillRect(2, -6, 6, 6)
+						ctx.fillStyle = '#000'
+						ctx.fillRect(-6, -4, 2, 2)
+						ctx.fillRect(4, -4, 2, 2)
+						ctx.restore()
+					}
+				}
+
+				// Draw Slingshot front strap
+				if (sling && sling.bodyB) {
+					ctx.beginPath()
+					ctx.moveTo(anchor.x + 10, anchor.y)
+					ctx.lineTo(bird.position.x, bird.position.y)
+					ctx.lineWidth = 6
+					ctx.strokeStyle = C.line
+					ctx.stroke()
+				}
+
+				// Update and draw particles
+				for (let i = particles.length - 1; i >= 0; i--) {
+					let p = particles[i]
+					p.x += p.vx
+					p.y += p.vy
+					p.vy += 0.2 // gravity
+					p.life -= 0.03
+
+					if (p.life <= 0) {
+						particles.splice(i, 1)
+						continue
+					}
+
+					ctx.fillStyle = p.color
+					ctx.globalAlpha = Math.max(0, p.life)
+					// Draw square particles for brutalist aesthetic
+					ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size)
+					ctx.lineWidth = 2
+					ctx.strokeStyle = C.line
+					ctx.strokeRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size)
+				}
+				ctx.globalAlpha = 1.0
+
+				if (!isGameOver) {
+					requestAnimationFrame(draw)
+				}
+			}
+
+			// Start!
+			initGame()
+		</script>
+	</body>
+</html>

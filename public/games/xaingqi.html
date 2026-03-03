@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>中国象棋 | XIANGQI ZEN</title>
+		<link rel="icon" href="/favicon.png" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&display=swap" rel="stylesheet" />
+		<style>
+			:root {
+				--bg-ink: #0f0f13;
+				--bg-board: #16161b;
+				--line-gold: #c29b62;
+				--line-faded: rgba(194, 155, 98, 0.25);
+				--piece-ivory: #f4f1ea;
+				--piece-shadow: rgba(0, 0, 0, 0.6);
+				--red-ink: #d12525;
+				--black-ink: #111111;
+				--accent-glow: rgba(209, 37, 37, 0.6);
+				--cell-size: 60px;
+				--board-padding: 30px;
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				background-color: var(--bg-ink);
+				color: var(--line-gold);
+				font-family: 'Noto Serif SC', serif;
+				min-height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				overflow: hidden;
+				background-image: radial-gradient(circle at 50% 50%, #1a1a22 0%, #08080a 100%);
+			}
+
+			.layout {
+				display: flex;
+				gap: 60px;
+				align-items: center;
+				max-width: 1200px;
+				width: 100%;
+				padding: 40px;
+				position: relative;
+			}
+
+			/* Ambient Decoration */
+			.ambient-text {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				font-size: 40vh;
+				color: rgba(255, 255, 255, 0.015);
+				font-weight: 900;
+				white-space: nowrap;
+				pointer-events: none;
+				z-index: 0;
+				letter-spacing: 2vw;
+			}
+
+			/* Left Panel */
+			.panel {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				z-index: 10;
+			}
+
+			.panel.left {
+				align-items: flex-end;
+				text-align: right;
+			}
+
+			.title-block h1 {
+				font-size: 64px;
+				line-height: 1.1;
+				font-weight: 900;
+				letter-spacing: 8px;
+				color: var(--line-gold);
+				text-shadow: 0 4px 20px rgba(194, 155, 98, 0.2);
+				margin-bottom: 10px;
+			}
+
+			.title-block p {
+				font-family: sans-serif;
+				font-size: 14px;
+				letter-spacing: 6px;
+				opacity: 0.5;
+				text-transform: uppercase;
+			}
+
+			/* Board Container */
+			.board-wrapper {
+				position: relative;
+				background-color: var(--bg-board);
+				padding: var(--board-padding);
+				border: 1px solid var(--line-faded);
+				box-shadow:
+					0 20px 60px rgba(0, 0, 0, 0.8),
+					inset 0 0 40px rgba(0, 0, 0, 0.5);
+				border-radius: 4px;
+				z-index: 5;
+			}
+
+			.board-wrapper::before {
+				content: '';
+				position: absolute;
+				top: 4px;
+				left: 4px;
+				right: 4px;
+				bottom: 4px;
+				border: 2px solid var(--line-faded);
+				pointer-events: none;
+			}
+
+			#board {
+				position: relative;
+				width: calc(var(--cell-size) * 8);
+				height: calc(var(--cell-size) * 9);
+			}
+
+			svg.grid {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				pointer-events: none;
+				overflow: visible;
+			}
+
+			svg.grid line,
+			svg.grid path {
+				stroke: var(--line-gold);
+				stroke-width: 1.5;
+				opacity: 0.6;
+			}
+
+			.river-text {
+				fill: var(--line-gold);
+				font-family: 'Noto Serif SC', serif;
+				font-size: 28px;
+				font-weight: 700;
+				opacity: 0.4;
+				letter-spacing: 40px;
+			}
+
+			/* Pieces */
+			.piece {
+				position: absolute;
+				width: 48px;
+				height: 48px;
+				border-radius: 50%;
+				background-color: var(--piece-ivory);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-size: 24px;
+				font-weight: 900;
+				cursor: pointer;
+				box-shadow:
+					0 8px 16px var(--piece-shadow),
+					inset 0 -4px 8px rgba(0, 0, 0, 0.1),
+					inset 0 0 0 2px rgba(194, 155, 98, 0.4);
+				transition:
+					transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+					box-shadow 0.2s,
+					background-color 0.2s;
+				z-index: 20;
+				/* Sub-pixel rendering optimization */
+				transform-style: preserve-3d;
+				margin-left: -24px;
+				margin-top: -24px;
+			}
+
+			.piece::after {
+				content: '';
+				position: absolute;
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				border: 1px solid rgba(0, 0, 0, 0.1);
+				pointer-events: none;
+			}
+
+			.piece.red {
+				color: var(--red-ink);
+			}
+			.piece.black {
+				color: var(--black-ink);
+			}
+
+			.piece:hover {
+				z-index: 21;
+				filter: brightness(1.1);
+			}
+
+			.piece.selected {
+				z-index: 22;
+				box-shadow:
+					0 0 0 3px var(--bg-board),
+					0 0 0 6px var(--line-gold),
+					0 12px 24px rgba(0, 0, 0, 0.8);
+				background-color: #fff;
+			}
+
+			/* Move Indicators */
+			.dot {
+				position: absolute;
+				width: 16px;
+				height: 16px;
+				border-radius: 50%;
+				background-color: var(--accent-glow);
+				box-shadow: 0 0 10px var(--accent-glow);
+				margin-left: -8px;
+				margin-top: -8px;
+				z-index: 15;
+				cursor: pointer;
+				transition: transform 0.2s;
+			}
+
+			.dot:hover {
+				transform: scale(1.5);
+				background-color: var(--red-ink);
+			}
+
+			.dot.capture {
+				background-color: transparent;
+				border: 3px solid var(--red-ink);
+				width: 44px;
+				height: 44px;
+				margin-left: -22px;
+				margin-top: -22px;
+				border-radius: 8px;
+				transform: rotate(45deg);
+			}
+
+			.dot.capture:hover {
+				background-color: rgba(209, 37, 37, 0.2);
+			}
+
+			/* Right Panel Controls */
+			.panel.right {
+				align-items: flex-start;
+			}
+
+			.status {
+				margin-bottom: 40px;
+			}
+
+			.turn-box {
+				display: inline-flex;
+				align-items: center;
+				gap: 12px;
+				padding: 12px 24px;
+				border: 1px solid var(--line-faded);
+				background: rgba(0, 0, 0, 0.3);
+				font-size: 20px;
+				letter-spacing: 2px;
+				transition: all 0.3s;
+			}
+
+			.turn-dot {
+				width: 12px;
+				height: 12px;
+				border-radius: 50%;
+				background-color: var(--red-ink);
+				box-shadow: 0 0 10px var(--red-ink);
+			}
+
+			.turn-box.black-turn .turn-dot {
+				background-color: #fff;
+				box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+			}
+
+			.controls {
+				display: flex;
+				flex-direction: column;
+				gap: 16px;
+			}
+
+			button {
+				background: transparent;
+				color: var(--line-gold);
+				border: 1px solid var(--line-faded);
+				padding: 16px 32px;
+				font-family: inherit;
+				font-size: 16px;
+				letter-spacing: 4px;
+				cursor: pointer;
+				transition: all 0.3s;
+				position: relative;
+				overflow: hidden;
+				text-align: left;
+			}
+
+			button::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: var(--line-gold);
+				transform: scaleX(0);
+				transform-origin: left;
+				transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+				z-index: -1;
+			}
+
+			button:hover {
+				color: var(--bg-ink);
+				border-color: var(--line-gold);
+			}
+
+			button:hover::before {
+				transform: scaleX(1);
+			}
+
+			/* Graveyard (Captured pieces) */
+			.graveyard {
+				margin-top: 40px;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				max-width: 200px;
+			}
+
+			.dead-piece {
+				width: 32px;
+				height: 32px;
+				border-radius: 50%;
+				background-color: #222;
+				color: rgba(255, 255, 255, 0.3);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-size: 16px;
+				border: 1px solid #333;
+				opacity: 0.8;
+				transition: all 0.3s;
+			}
+
+			.dead-piece.red {
+				color: rgba(209, 37, 37, 0.4);
+				border-color: rgba(209, 37, 37, 0.2);
+			}
+
+			@media (max-width: 1024px) {
+				.layout {
+					flex-direction: column;
+					gap: 30px;
+				}
+				.panel {
+					align-items: center !important;
+					text-align: center !important;
+				}
+				.graveyard {
+					justify-content: center;
+				}
+			}
+
+			/* Modal */
+			.modal-overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.85);
+				backdrop-filter: blur(8px);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.5s;
+				z-index: 100;
+			}
+			.modal-overlay.active {
+				opacity: 1;
+				pointer-events: all;
+			}
+			.modal-content {
+				text-align: center;
+				transform: translateY(20px);
+				transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+			}
+			.modal-overlay.active .modal-content {
+				transform: translateY(0);
+			}
+			.modal-title {
+				font-size: 80px;
+				color: var(--line-gold);
+				margin-bottom: 30px;
+				letter-spacing: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="ambient-text">楚河汉界</div>
+
+		<div class="layout">
+			<aside class="panel left">
+				<div class="title-block">
+					<h1>象棋</h1>
+					<p>XIANGQI ZEN</p>
+				</div>
+				<div class="graveyard" id="red-graveyard"></div>
+			</aside>
+
+			<main class="board-wrapper">
+				<div id="board">
+					<!-- SVG dynamically injected -->
+				</div>
+			</main>
+
+			<aside class="panel right">
+				<div class="status">
+					<div class="turn-box" id="turn-box">
+						<div class="turn-dot"></div>
+						<span id="turn-text">红方回合</span>
+					</div>
+				</div>
+				<div class="controls">
+					<button onclick="initGame()">重新开始</button>
+					<button onclick="resign()">认输结算</button>
+				</div>
+				<div class="graveyard" id="black-graveyard"></div>
+			</aside>
+		</div>
+
+		<div class="modal-overlay" id="modal">
+			<div class="modal-content">
+				<div class="modal-title" id="modal-msg">红方胜</div>
+				<button onclick="initGame()" style="display: inline-block; text-align: center">再弈一局</button>
+			</div>
+		</div>
+
+		<script>
+			const CELL = 60
+			const boardEl = document.getElementById('board')
+
+			const PIECE_TEXT = {
+				r_g: '帅',
+				r_a: '仕',
+				r_e: '相',
+				r_h: '马',
+				r_r: '车',
+				r_c: '炮',
+				r_p: '兵',
+				b_g: '将',
+				b_a: '士',
+				b_e: '象',
+				b_h: '马',
+				b_r: '车',
+				b_c: '炮',
+				b_p: '卒'
+			}
+
+			const INITIAL_STATE = [
+				['b_r_1', 'b_h_1', 'b_e_1', 'b_a_1', 'b_g_1', 'b_a_2', 'b_e_2', 'b_h_2', 'b_r_2'],
+				[null, null, null, null, null, null, null, null, null],
+				[null, 'b_c_1', null, null, null, null, null, 'b_c_2', null],
+				['b_p_1', null, 'b_p_2', null, 'b_p_3', null, 'b_p_4', null, 'b_p_5'],
+				[null, null, null, null, null, null, null, null, null],
+				[null, null, null, null, null, null, null, null, null],
+				['r_p_1', null, 'r_p_2', null, 'r_p_3', null, 'r_p_4', null, 'r_p_5'],
+				[null, 'r_c_1', null, null, null, null, null, 'r_c_2', null],
+				[null, null, null, null, null, null, null, null, null],
+				['r_r_1', 'r_h_1', 'r_e_1', 'r_a_1', 'r_g_1', 'r_a_2', 'r_e_2', 'r_h_2', 'r_r_2']
+			]
+
+			let state = [] // 10x9 logical board
+			let piecesMap = {} // id -> HTMLElement
+			let turn = 'r' // 'r' or 'b'
+			let selectedId = null
+
+			function drawBoardGrid() {
+				let svg = `<svg class="grid" width="480" height="540">`
+				// Horizontal lines
+				for (let i = 0; i <= 9; i++) {
+					svg += `<line x1="0" y1="${i * CELL}" x2="480" y2="${i * CELL}" />`
+				}
+				// Vertical lines
+				for (let i = 0; i <= 8; i++) {
+					if (i === 0 || i === 8) {
+						svg += `<line x1="${i * CELL}" y1="0" x2="${i * CELL}" y2="540" />`
+					} else {
+						svg += `<line x1="${i * CELL}" y1="0" x2="${i * CELL}" y2="240" />`
+						svg += `<line x1="${i * CELL}" y1="300" x2="${i * CELL}" y2="540" />`
+					}
+				}
+				// Palaces
+				svg += `<line x1="180" y1="0" x2="300" y2="120" />`
+				svg += `<line x1="300" y1="0" x2="180" y2="120" />`
+				svg += `<line x1="180" y1="420" x2="300" y2="540" />`
+				svg += `<line x1="300" y1="420" x2="180" y2="540" />`
+
+				// River Text
+				svg += `<text x="70" y="280" class="river-text">楚河</text>`
+				svg += `<text x="290" y="280" class="river-text">汉界</text>`
+
+				// Crosshairs (decorative)
+				const crosses = [
+					{ x: 1, y: 2 },
+					{ x: 7, y: 2 },
+					{ x: 0, y: 3 },
+					{ x: 2, y: 3 },
+					{ x: 4, y: 3 },
+					{ x: 6, y: 3 },
+					{ x: 8, y: 3 },
+					{ x: 1, y: 7 },
+					{ x: 7, y: 7 },
+					{ x: 0, y: 6 },
+					{ x: 2, y: 6 },
+					{ x: 4, y: 6 },
+					{ x: 6, y: 6 },
+					{ x: 8, y: 6 }
+				]
+				crosses.forEach(c => {
+					let px = c.x * CELL,
+						py = c.y * CELL
+					const L = 12,
+						S = 4
+					if (c.x > 0) {
+						// Left parts
+						svg += `<path d="M${px - S},${py - S} L${px - S - L},${py - S} M${px - S},${py - S} L${px - S},${py - S - L}" />`
+						svg += `<path d="M${px - S},${py + S} L${px - S - L},${py + S} M${px - S},${py + S} L${px - S},${py + S + L}" />`
+					}
+					if (c.x < 8) {
+						// Right parts
+						svg += `<path d="M${px + S},${py - S} L${px + S + L},${py - S} M${px + S},${py - S} L${px + S},${py - S - L}" />`
+						svg += `<path d="M${px + S},${py + S} L${px + S + L},${py + S} M${px + S},${py + S} L${px + S},${py + S + L}" />`
+					}
+				})
+
+				svg += `</svg>`
+				return svg
+			}
+
+			function initGame() {
+				boardEl.innerHTML = drawBoardGrid()
+				document.getElementById('red-graveyard').innerHTML = ''
+				document.getElementById('black-graveyard').innerHTML = ''
+				document.getElementById('modal').classList.remove('active')
+				piecesMap = {}
+				state = JSON.parse(JSON.stringify(INITIAL_STATE))
+				turn = 'r'
+				selectedId = null
+				updateTurnUI()
+
+				for (let y = 0; y < 10; y++) {
+					for (let x = 0; x < 9; x++) {
+						const id = state[y][x]
+						if (id) {
+							createPieceDOM(id, x, y)
+						}
+					}
+				}
+			}
+
+			function createPieceDOM(id, x, y) {
+				const type = id.substring(0, 3) // e.g. 'r_c'
+				const color = id.charAt(0) === 'r' ? 'red' : 'black'
+				const text = PIECE_TEXT[type]
+
+				const el = document.createElement('div')
+				el.className = `piece ${color}`
+				el.id = id
+				el.textContent = text
+				el.style.transform = `translate(${x * CELL}px, ${y * CELL}px)`
+
+				el.onclick = e => handlePieceClick(id, e)
+				boardEl.appendChild(el)
+				piecesMap[id] = el
+			}
+
+			function getPiecePos(id) {
+				for (let y = 0; y < 10; y++) {
+					for (let x = 0; x < 9; x++) {
+						if (state[y][x] === id) return { x, y }
+					}
+				}
+				return null
+			}
+
+			function handlePieceClick(id, e) {
+				if (e) e.stopPropagation()
+				const color = id.charAt(0)
+
+				// Get current position instead of relying on stale closure variables
+				const pos = getPiecePos(id)
+				if (!pos) return
+				const x = pos.x
+				const y = pos.y
+
+				// If clicking own piece
+				if (color === turn) {
+					if (selectedId) piecesMap[selectedId].classList.remove('selected')
+					selectedId = id
+					piecesMap[id].classList.add('selected')
+					showValidMoves(id)
+				} else if (selectedId) {
+					// If clicking enemy piece and we have one selected, try to capture
+					const moves = calculateMoves(selectedId)
+					const canCapture = moves.some(m => m.x === x && m.y === y)
+					if (canCapture) {
+						executeMove(selectedId, x, y)
+					}
+				}
+			}
+
+			function showValidMoves(id) {
+				clearDots()
+				const moves = calculateMoves(id)
+				moves.forEach(m => {
+					const dot = document.createElement('div')
+					const isCapture = state[m.y][m.x] !== null
+					dot.className = `dot ${isCapture ? 'capture' : ''}`
+					dot.style.transform = `translate(${m.x * CELL}px, ${m.y * CELL}px)`
+					dot.onclick = e => {
+						e.stopPropagation()
+						executeMove(id, m.x, m.y)
+					}
+					boardEl.appendChild(dot)
+				})
+			}
+
+			function clearDots() {
+				document.querySelectorAll('.dot').forEach(el => el.remove())
+			}
+
+			function executeMove(id, tx, ty) {
+				const pos = getPiecePos(id)
+				const targetId = state[ty][tx]
+
+				// Capture logic
+				if (targetId) {
+					const targetEl = piecesMap[targetId]
+					targetEl.style.transform = 'scale(0)'
+					targetEl.style.opacity = '0'
+					setTimeout(() => {
+						targetEl.remove()
+						addToGraveyard(targetId)
+					}, 300)
+
+					if (targetId.includes('_g_')) {
+						setTimeout(() => endGame(turn === 'r' ? '红方胜' : '黑方胜'), 500)
+					}
+				}
+
+				// Move logical state
+				state[pos.y][pos.x] = null
+				state[ty][tx] = id
+
+				// Move DOM
+				piecesMap[id].style.transform = `translate(${tx * CELL}px, ${ty * CELL}px)`
+				piecesMap[id].classList.remove('selected')
+				selectedId = null
+				clearDots()
+
+				turn = turn === 'r' ? 'b' : 'r'
+				updateTurnUI()
+			}
+
+			function addToGraveyard(id) {
+				const color = id.charAt(0) === 'r' ? 'red' : 'black'
+				const gy = document.getElementById(color === 'red' ? 'red-graveyard' : 'black-graveyard')
+				const type = id.substring(0, 3)
+				const el = document.createElement('div')
+				el.className = `dead-piece ${color}`
+				el.textContent = PIECE_TEXT[type]
+				gy.appendChild(el)
+			}
+
+			function updateTurnUI() {
+				const box = document.getElementById('turn-box')
+				const txt = document.getElementById('turn-text')
+				if (turn === 'r') {
+					box.classList.remove('black-turn')
+					txt.textContent = '红方回合'
+					txt.style.color = 'var(--red-ink)'
+				} else {
+					box.classList.add('black-turn')
+					txt.textContent = '黑方回合'
+					txt.style.color = '#fff'
+				}
+			}
+
+			function resign() {
+				endGame(turn === 'r' ? '黑方胜' : '红方胜')
+			}
+
+			function endGame(msg) {
+				document.getElementById('modal-msg').textContent = msg
+				document.getElementById('modal').classList.add('active')
+			}
+
+			boardEl.addEventListener('click', () => {
+				if (selectedId) {
+					piecesMap[selectedId].classList.remove('selected')
+					selectedId = null
+					clearDots()
+				}
+			})
+
+			// Xiangqi Rules Engine
+			function calculateMoves(id) {
+				const pos = getPiecePos(id)
+				if (!pos) return []
+				const { x, y } = pos
+				const color = id.charAt(0)
+				const type = id.charAt(2)
+				let moves = []
+
+				const addValid = (nx, ny) => {
+					if (nx >= 0 && nx <= 8 && ny >= 0 && ny <= 9) {
+						const target = state[ny][nx]
+						if (!target || target.charAt(0) !== color) moves.push({ x: nx, y: ny })
+					}
+				}
+
+				const addValidNoCapture = (nx, ny) => {
+					if (nx >= 0 && nx <= 8 && ny >= 0 && ny <= 9 && !state[ny][nx]) moves.push({ x: nx, y: ny })
+				}
+
+				if (type === 'g') {
+					;[
+						[0, 1],
+						[0, -1],
+						[1, 0],
+						[-1, 0]
+					].forEach(d => {
+						let nx = x + d[0],
+							ny = y + d[1]
+						if (nx >= 3 && nx <= 5 && ((color === 'r' && ny >= 7) || (color === 'b' && ny <= 2))) {
+							addValid(nx, ny)
+						}
+					})
+					// Flying general
+					let dir = color === 'r' ? -1 : 1
+					for (let i = y + dir; i >= 0 && i <= 9; i += dir) {
+						if (state[i][x]) {
+							if (state[i][x].charAt(2) === 'g' && state[i][x].charAt(0) !== color) {
+								moves.push({ x: x, y: i })
+							}
+							break
+						}
+					}
+				} else if (type === 'a') {
+					;[
+						[1, 1],
+						[1, -1],
+						[-1, 1],
+						[-1, -1]
+					].forEach(d => {
+						let nx = x + d[0],
+							ny = y + d[1]
+						if (nx >= 3 && nx <= 5 && ((color === 'r' && ny >= 7) || (color === 'b' && ny <= 2))) {
+							addValid(nx, ny)
+						}
+					})
+				} else if (type === 'e') {
+					;[
+						[2, 2],
+						[2, -2],
+						[-2, 2],
+						[-2, -2]
+					].forEach(d => {
+						let nx = x + d[0],
+							ny = y + d[1]
+						let bx = x + d[0] / 2,
+							by = y + d[1] / 2
+						if (nx >= 0 && nx <= 8 && ny >= 0 && ny <= 9 && !state[by][bx]) {
+							if ((color === 'r' && ny >= 5) || (color === 'b' && ny <= 4)) {
+								addValid(nx, ny)
+							}
+						}
+					})
+				} else if (type === 'h') {
+					const jumps = [
+						{ d: [1, 2], b: [0, 1] },
+						{ d: [1, -2], b: [0, -1] },
+						{ d: [-1, 2], b: [0, 1] },
+						{ d: [-1, -2], b: [0, -1] },
+						{ d: [2, 1], b: [1, 0] },
+						{ d: [2, -1], b: [1, 0] },
+						{ d: [-2, 1], b: [-1, 0] },
+						{ d: [-2, -1], b: [-1, 0] }
+					]
+					jumps.forEach(j => {
+						let nx = x + j.d[0],
+							ny = y + j.d[1]
+						let bx = x + j.b[0],
+							by = y + j.b[1]
+						if (nx >= 0 && nx <= 8 && ny >= 0 && ny <= 9 && !state[by][bx]) {
+							addValid(nx, ny)
+						}
+					})
+				} else if (type === 'r') {
+					;[
+						[0, 1],
+						[0, -1],
+						[1, 0],
+						[-1, 0]
+					].forEach(d => {
+						let nx = x + d[0],
+							ny = y + d[1]
+						while (nx >= 0 && nx <= 8 && ny >= 0 && ny <= 9) {
+							if (!state[ny][nx]) {
+								addValid(nx, ny)
+							} else {
+								addValid(nx, ny)
+								break
+							}
+							nx += d[0]
+							ny += d[1]
+						}
+					})
+				} else if (type === 'c') {
+					;[
+						[0, 1],
+						[0, -1],
+						[1, 0],
+						[-1, 0]
+					].forEach(d => {
+						let nx = x + d[0],
+							ny = y + d[1]
+						let jumped = false
+						while (nx >= 0 && nx <= 8 && ny >= 0 && ny <= 9) {
+							if (!state[ny][nx]) {
+								if (!jumped) addValid(nx, ny)
+							} else {
+								if (!jumped) jumped = true
+								else {
+									addValid(nx, ny)
+									break
+								}
+							}
+							nx += d[0]
+							ny += d[1]
+						}
+					})
+				} else if (type === 'p') {
+					let dy = color === 'r' ? -1 : 1
+					addValid(x, y + dy)
+					if ((color === 'r' && y <= 4) || (color === 'b' && y >= 5)) {
+						addValid(x - 1, y)
+						addValid(x + 1, y)
+					}
+				}
+				return moves
+			}
+
+			// Boot
+			initGame()
+		</script>
+	</body>
+</html>

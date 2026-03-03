@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>杀戮尖塔 - 终端简装版</title>
+		<link rel="icon" href="/favicon.png" />
+		<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet" />
+		<style>
+			:root {
+				--bg: #0a0a0a;
+				--surface: #1a1a1a;
+				--surface-hover: #2a2a2a;
+				--text-main: #e0e0e0;
+				--text-muted: #888888;
+				--red: #d32f2f;
+				--red-dark: #8b0000;
+				--blue: #1976d2;
+				--blue-light: #64b5f6;
+				--gold: #fbc02d;
+				--border: #333333;
+
+				--font-serif: 'Noto Serif SC', serif;
+				--font-mono: 'JetBrains Mono', monospace;
+			}
+
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+				user-select: none;
+			}
+
+			body {
+				background-color: var(--bg);
+				color: var(--text-main);
+				font-family: var(--font-serif);
+				height: 100vh;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+				background-image:
+					radial-gradient(circle at 50% 0%, rgba(211, 47, 47, 0.05) 0%, transparent 50%), linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+					linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+				background-size:
+					100% 100%,
+					40px 40px,
+					40px 40px;
+			}
+
+			/* Battlefield */
+			.battlefield {
+				flex: 1;
+				display: flex;
+				justify-content: space-around;
+				align-items: center;
+				position: relative;
+				padding: 0 10%;
+			}
+
+			.character {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				width: 200px;
+				position: relative;
+			}
+
+			.intent-box {
+				height: 60px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				margin-bottom: 20px;
+				font-family: var(--font-mono);
+				font-size: 1.5rem;
+				font-weight: bold;
+				text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+				opacity: 0;
+				transition: opacity 0.3s;
+			}
+			.intent-box.visible {
+				opacity: 1;
+			}
+
+			.intent-attack {
+				color: var(--red);
+			}
+			.intent-defend {
+				color: var(--blue-light);
+			}
+			.intent-buff {
+				color: var(--gold);
+			}
+
+			.sprite {
+				width: 160px;
+				height: 220px;
+				background: var(--surface);
+				border: 2px solid var(--border);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-size: 4rem;
+				box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.5);
+				position: relative;
+				transition:
+					transform 0.2s,
+					filter 0.2s;
+			}
+
+			.sprite::before {
+				content: '';
+				position: absolute;
+				inset: 4px;
+				border: 1px dashed var(--border);
+				pointer-events: none;
+			}
+
+			.player .sprite {
+				background: linear-gradient(135deg, #1a1a1a, #2a1515);
+				border-color: var(--red-dark);
+			}
+
+			.enemy .sprite {
+				background: linear-gradient(135deg, #1a1a1a, #15152a);
+			}
+
+			.name {
+				margin-top: 20px;
+				font-size: 1.5rem;
+				font-weight: 900;
+				letter-spacing: 2px;
+			}
+
+			/* Stats */
+			.stats-container {
+				width: 100%;
+				margin-top: 15px;
+				position: relative;
+			}
+
+			.health-bar {
+				width: 100%;
+				height: 12px;
+				background: #222;
+				border: 1px solid var(--border);
+				position: relative;
+			}
+
+			.health-fill {
+				height: 100%;
+				background: var(--red);
+				width: 100%;
+				transition: width 0.3s ease;
+			}
+
+			.hp-text {
+				font-family: var(--font-mono);
+				font-size: 1rem;
+				text-align: center;
+				margin-top: 5px;
+				color: var(--text-muted);
+			}
+
+			.block-badge {
+				position: absolute;
+				top: -15px;
+				left: -15px;
+				background: var(--blue);
+				color: white;
+				font-family: var(--font-mono);
+				font-weight: bold;
+				width: 40px;
+				height: 40px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				border-radius: 4px;
+				border: 2px solid var(--bg);
+				transform: rotate(-10deg);
+				opacity: 0;
+				transition:
+					opacity 0.3s,
+					transform 0.3s;
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+				z-index: 2;
+			}
+
+			.block-badge.active {
+				opacity: 1;
+				transform: rotate(-5deg) scale(1.1);
+			}
+
+			/* HUD Bottom */
+			.hud {
+				height: 35vh;
+				background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+				border-top: 1px solid var(--border);
+				position: relative;
+				display: flex;
+				align-items: flex-end;
+				padding: 20px;
+				gap: 20px;
+			}
+
+			/* Energy */
+			.energy-container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				width: 120px;
+				height: 120px;
+				background: radial-gradient(circle, var(--surface-hover), var(--bg));
+				border: 2px solid var(--gold);
+				border-radius: 50%;
+				box-shadow: 0 0 20px rgba(251, 192, 45, 0.2);
+				position: relative;
+				z-index: 10;
+			}
+
+			.energy-val {
+				font-family: var(--font-mono);
+				font-size: 3rem;
+				font-weight: 800;
+				color: var(--gold);
+				line-height: 1;
+			}
+
+			.energy-max {
+				font-family: var(--font-mono);
+				font-size: 1rem;
+				color: var(--text-muted);
+			}
+
+			/* Hand */
+			.hand {
+				flex: 1;
+				display: flex;
+				justify-content: center;
+				align-items: flex-end;
+				gap: -20px;
+				height: 100%;
+				perspective: 1000px;
+				padding-bottom: 20px;
+			}
+
+			/* Card */
+			.card {
+				width: 180px;
+				height: 260px;
+				background: var(--surface);
+				border: 2px solid var(--border);
+				border-radius: 8px;
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+				cursor: pointer;
+				box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+				margin: 0 -15px;
+				transform-origin: bottom center;
+			}
+
+			.card:hover {
+				transform: translateY(-40px) scale(1.1) rotate(0deg) !important;
+				z-index: 100 !important;
+				border-color: var(--text-muted);
+				box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+			}
+
+			.card.disabled {
+				filter: grayscale(1) brightness(0.5);
+				cursor: not-allowed;
+			}
+
+			.card.disabled:hover {
+				transform: translateY(-10px) !important;
+			}
+
+			.card-cost {
+				position: absolute;
+				top: -10px;
+				left: -10px;
+				width: 40px;
+				height: 40px;
+				background: var(--gold);
+				color: var(--bg);
+				border-radius: 50%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-family: var(--font-mono);
+				font-size: 1.5rem;
+				font-weight: 800;
+				border: 3px solid var(--bg);
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+				z-index: 2;
+			}
+
+			.card-header {
+				padding: 15px 10px 5px;
+				text-align: center;
+				border-bottom: 1px solid var(--border);
+				background: rgba(0, 0, 0, 0.2);
+			}
+
+			.card-title {
+				font-size: 1.2rem;
+				font-weight: 900;
+				letter-spacing: 2px;
+			}
+
+			.card-type {
+				font-size: 0.7rem;
+				color: var(--text-muted);
+				text-transform: uppercase;
+				letter-spacing: 1px;
+				margin-top: 4px;
+			}
+
+			.card-art {
+				flex: 1;
+				background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255, 255, 255, 0.02) 5px, rgba(255, 255, 255, 0.02) 10px);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-size: 2.5rem;
+				color: var(--border);
+			}
+
+			.card.type-attack .card-art {
+				color: rgba(211, 47, 47, 0.2);
+			}
+			.card.type-skill .card-art {
+				color: rgba(25, 118, 210, 0.2);
+			}
+
+			.card-desc {
+				padding: 15px;
+				font-size: 0.9rem;
+				line-height: 1.5;
+				text-align: center;
+				background: var(--bg);
+				border-top: 1px solid var(--border);
+				border-bottom-left-radius: 6px;
+				border-bottom-right-radius: 6px;
+				height: 80px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			/* Controls */
+			.controls {
+				display: flex;
+				flex-direction: column;
+				gap: 15px;
+				width: 150px;
+				align-items: flex-end;
+				z-index: 10;
+			}
+
+			.end-turn-btn {
+				background: var(--surface);
+				color: var(--text-main);
+				border: 2px solid var(--border);
+				padding: 15px 20px;
+				font-family: var(--font-serif);
+				font-size: 1.2rem;
+				font-weight: 900;
+				cursor: pointer;
+				transition: all 0.2s;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				width: 100%;
+			}
+
+			.end-turn-btn:hover {
+				background: var(--text-main);
+				color: var(--bg);
+				border-color: var(--text-main);
+			}
+
+			.end-turn-btn:disabled {
+				background: var(--surface);
+				color: var(--border);
+				cursor: not-allowed;
+				border-color: var(--border);
+			}
+
+			.pile-info {
+				font-family: var(--font-mono);
+				font-size: 0.9rem;
+				color: var(--text-muted);
+				text-align: right;
+				width: 100%;
+				background: var(--surface);
+				padding: 10px;
+				border: 1px solid var(--border);
+			}
+
+			.pile-info span {
+				color: var(--text-main);
+				font-weight: bold;
+				display: inline-block;
+				width: 20px;
+			}
+
+			/* Animations & Effects */
+			.shake {
+				animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+			}
+
+			@keyframes shake {
+				10%,
+				90% {
+					transform: translate3d(-2px, 0, 0);
+				}
+				20%,
+				80% {
+					transform: translate3d(4px, 0, 0);
+				}
+				30%,
+				50%,
+				70% {
+					transform: translate3d(-6px, 0, 0);
+				}
+				40%,
+				60% {
+					transform: translate3d(6px, 0, 0);
+				}
+			}
+
+			.damage-number {
+				position: absolute;
+				color: var(--red);
+				font-family: var(--font-mono);
+				font-size: 3rem;
+				font-weight: 900;
+				text-shadow:
+					2px 2px 0 #000,
+					-2px -2px 0 #000,
+					2px -2px 0 #000,
+					-2px 2px 0 #000;
+				pointer-events: none;
+				z-index: 100;
+				animation: floatUp 1s ease-out forwards;
+			}
+
+			.block-number {
+				color: var(--blue-light);
+			}
+
+			@keyframes floatUp {
+				0% {
+					transform: translateY(0) scale(0.5);
+					opacity: 0;
+				}
+				20% {
+					transform: translateY(-20px) scale(1.2);
+					opacity: 1;
+				}
+				100% {
+					transform: translateY(-80px) scale(1);
+					opacity: 0;
+				}
+			}
+
+			.flash-red {
+				filter: brightness(2) drop-shadow(0 0 10px red);
+			}
+
+			/* Modal */
+			.modal-overlay {
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.85);
+				backdrop-filter: blur(5px);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 1000;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.5s;
+			}
+
+			.modal-overlay.active {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			.modal-content {
+				background: var(--surface);
+				border: 2px solid var(--border);
+				padding: 50px;
+				text-align: center;
+				min-width: 400px;
+				box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+			}
+
+			.modal-title {
+				font-size: 3rem;
+				margin-bottom: 30px;
+				letter-spacing: 5px;
+			}
+
+			.modal-title.victory {
+				color: var(--gold);
+			}
+			.modal-title.defeat {
+				color: var(--red);
+			}
+
+			.modal-btn {
+				background: transparent;
+				color: var(--text-main);
+				border: 2px solid var(--text-main);
+				padding: 15px 40px;
+				font-family: var(--font-serif);
+				font-size: 1.2rem;
+				cursor: pointer;
+				transition: all 0.2s;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+			}
+
+			.modal-btn:hover {
+				background: var(--text-main);
+				color: var(--bg);
+			}
+
+			/* Action Log */
+			.action-log {
+				position: absolute;
+				top: 20px;
+				left: 20px;
+				width: 300px;
+				max-height: 200px;
+				overflow-y: hidden;
+				display: flex;
+				flex-direction: column-reverse;
+				gap: 5px;
+				font-family: var(--font-mono);
+				font-size: 0.85rem;
+				color: var(--text-muted);
+				pointer-events: none;
+				mask-image: linear-gradient(to bottom, transparent, black 20%, black);
+				-webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black);
+			}
+
+			.log-entry {
+				animation: fadeIn 0.3s ease-out;
+			}
+
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+					transform: translateX(-10px);
+				}
+				to {
+					opacity: 1;
+					transform: translateX(0);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="action-log" id="action-log"></div>
+
+		<div class="battlefield">
+			<div class="character player" id="player">
+				<div class="intent-box" id="player-intent"></div>
+				<div class="sprite" id="player-sprite">🛡️</div>
+				<div class="name">铁甲卫士</div>
+				<div class="stats-container">
+					<div class="block-badge" id="player-block">0</div>
+					<div class="health-bar"><div class="health-fill" id="player-hp-fill"></div></div>
+					<div class="hp-text" id="player-hp">80/80</div>
+				</div>
+			</div>
+
+			<div class="character enemy" id="enemy">
+				<div class="intent-box visible" id="enemy-intent">⚔️ 11</div>
+				<div class="sprite" id="enemy-sprite">🕷️</div>
+				<div class="name">大颚虫</div>
+				<div class="stats-container">
+					<div class="block-badge" id="enemy-block">0</div>
+					<div class="health-bar"><div class="health-fill" id="enemy-hp-fill"></div></div>
+					<div class="hp-text" id="enemy-hp">40/40</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="hud">
+			<div class="energy-container">
+				<div class="energy-val" id="energy-val">3</div>
+				<div class="energy-max">/3</div>
+			</div>
+
+			<div class="hand" id="hand">
+				<!-- Cards rendered via JS -->
+			</div>
+
+			<div class="controls">
+				<div class="pile-info">
+					抽牌堆 <span id="draw-count">0</span><br />
+					弃牌堆 <span id="discard-count">0</span>
+				</div>
+				<button class="end-turn-btn" id="end-turn-btn" onclick="endTurn()">结束回合</button>
+			</div>
+		</div>
+
+		<div class="modal-overlay" id="game-over-modal">
+			<div class="modal-content">
+				<h1 class="modal-title" id="game-over-title">战斗结束</h1>
+				<p id="game-over-desc" style="margin-bottom: 30px; color: var(--text-muted)"></p>
+				<button class="modal-btn" onclick="initGame()">重新开始</button>
+			</div>
+		</div>
+
+		<script>
+			// --- Game Data ---
+			const CARDS = {
+				strike: { id: 'strike', name: '打击', type: 'attack', cost: 1, val: 6, desc: '造成 6 点伤害。', icon: '⚔️' },
+				defend: { id: 'defend', name: '防御', type: 'skill', cost: 1, val: 5, desc: '获得 5 点格挡。', icon: '🛡️' },
+				bash: { id: 'bash', name: '痛击', type: 'attack', cost: 2, val: 10, desc: '造成 10 点伤害。', icon: '🔨' }
+			}
+
+			let state = {
+				player: { maxHp: 80, hp: 80, maxEnergy: 3, energy: 3, block: 0 },
+				enemy: { name: '大颚虫', maxHp: 45, hp: 45, block: 0, intent: null },
+				deck: [],
+				drawPile: [],
+				discardPile: [],
+				hand: [],
+				turn: 'player' // 'player' or 'enemy'
+			}
+
+			let enemyActions = [
+				{ type: 'attack', val: 11, desc: '⚔️ 11' },
+				{ type: 'buff', val: 8, desc: '🛡️ 8' },
+				{ type: 'attack_defend', attackVal: 7, blockVal: 5, desc: '⚔️ 7 | 🛡️ 5' }
+			]
+
+			// --- Utility ---
+			function shuffle(array) {
+				for (let i = array.length - 1; i > 0; i--) {
+					const j = Math.floor(Math.random() * (i + 1))
+					;[array[i], array[j]] = [array[j], array[i]]
+				}
+				return array
+			}
+
+			function logAction(msg) {
+				const log = document.getElementById('action-log')
+				const entry = document.createElement('div')
+				entry.className = 'log-entry'
+				entry.textContent = `> ${msg}`
+				log.prepend(entry)
+				if (log.children.length > 10) log.removeChild(log.lastChild)
+			}
+
+			function showNumberText(targetId, text, isBlock = false) {
+				const target = document.getElementById(targetId)
+				const rect = target.getBoundingClientRect()
+				const el = document.createElement('div')
+				el.className = `damage-number ${isBlock ? 'block-number' : ''}`
+				el.textContent = text
+
+				// Random offset
+				const offsetX = (Math.random() - 0.5) * 40
+				const offsetY = (Math.random() - 0.5) * 40
+
+				el.style.left = `${rect.left + rect.width / 2 + offsetX}px`
+				el.style.top = `${rect.top + rect.height / 2 + offsetY}px`
+
+				document.body.appendChild(el)
+				setTimeout(() => el.remove(), 1000)
+			}
+
+			function shakeElement(id) {
+				const el = document.getElementById(id)
+				el.classList.remove('shake')
+				void el.offsetWidth // trigger reflow
+				el.classList.add('shake', 'flash-red')
+				setTimeout(() => el.classList.remove('flash-red'), 200)
+			}
+
+			// --- Core Logic ---
+			function initGame() {
+				document.getElementById('game-over-modal').classList.remove('active')
+				document.getElementById('action-log').innerHTML = ''
+
+				state.player = { maxHp: 80, hp: 80, maxEnergy: 3, energy: 3, block: 0 }
+				state.enemy = { name: '大颚虫', maxHp: 45, hp: 45, block: 0, intent: null }
+
+				state.deck = ['strike', 'strike', 'strike', 'strike', 'strike', 'defend', 'defend', 'defend', 'defend', 'bash']
+
+				state.drawPile = shuffle([...state.deck])
+				state.discardPile = []
+				state.hand = []
+
+				logAction('遭遇 大颚虫！')
+				setEnemyIntent()
+				startPlayerTurn()
+			}
+
+			function setEnemyIntent() {
+				const rand = Math.floor(Math.random() * enemyActions.length)
+				state.enemy.intent = enemyActions[rand]
+				updateUI()
+			}
+
+			function drawCard() {
+				if (state.drawPile.length === 0) {
+					if (state.discardPile.length === 0) return false
+					state.drawPile = shuffle([...state.discardPile])
+					state.discardPile = []
+					logAction('洗牌')
+				}
+				state.hand.push(state.drawPile.pop())
+				return true
+			}
+
+			function startPlayerTurn() {
+				state.turn = 'player'
+				state.player.energy = state.player.maxEnergy
+				state.player.block = 0
+
+				for (let i = 0; i < 5; i++) drawCard()
+
+				logAction('玩家回合开始')
+				document.getElementById('end-turn-btn').disabled = false
+				updateUI()
+			}
+
+			window.playCard = function (handIndex) {
+				if (state.turn !== 'player') return
+
+				const cardId = state.hand[handIndex]
+				const cardData = CARDS[cardId]
+
+				if (state.player.energy < cardData.cost) {
+					logAction('能量不足')
+					return
+				}
+
+				state.player.energy -= cardData.cost
+				logAction(`打出 ${cardData.name}`)
+
+				if (cardData.type === 'attack') {
+					dealDamageToEnemy(cardData.val)
+				} else if (cardData.type === 'skill') {
+					addPlayerBlock(cardData.val)
+				}
+
+				state.discardPile.push(cardId)
+				state.hand.splice(handIndex, 1)
+
+				updateUI()
+				checkGameState()
+			}
+
+			function dealDamageToEnemy(amount) {
+				let dmg = amount
+				if (state.enemy.block > 0) {
+					if (state.enemy.block >= dmg) {
+						state.enemy.block -= dmg
+						showNumberText('enemy-sprite', '已格挡', true)
+						dmg = 0
+					} else {
+						dmg -= state.enemy.block
+						state.enemy.block = 0
+					}
+				}
+
+				if (dmg > 0) {
+					state.enemy.hp -= dmg
+					showNumberText('enemy-sprite', `-${dmg}`)
+					shakeElement('enemy-sprite')
+				}
+			}
+
+			function dealDamageToPlayer(amount) {
+				let dmg = amount
+				if (state.player.block > 0) {
+					if (state.player.block >= dmg) {
+						state.player.block -= dmg
+						showNumberText('player-sprite', '已格挡', true)
+						dmg = 0
+					} else {
+						dmg -= state.player.block
+						state.player.block = 0
+					}
+				}
+
+				if (dmg > 0) {
+					state.player.hp -= dmg
+					showNumberText('player-sprite', `-${dmg}`)
+					shakeElement('player-sprite')
+				}
+			}
+
+			function addPlayerBlock(amount) {
+				state.player.block += amount
+				showNumberText('player-sprite', `+${amount}🛡️`, true)
+			}
+
+			function addEnemyBlock(amount) {
+				state.enemy.block += amount
+				showNumberText('enemy-sprite', `+${amount}🛡️`, true)
+			}
+
+			window.endTurn = function () {
+				if (state.turn !== 'player') return
+
+				logAction('玩家结束回合')
+
+				while (state.hand.length > 0) {
+					state.discardPile.push(state.hand.pop())
+				}
+
+				state.turn = 'enemy'
+				document.getElementById('end-turn-btn').disabled = true
+				updateUI()
+
+				setTimeout(executeEnemyTurn, 800)
+			}
+
+			function executeEnemyTurn() {
+				if (state.enemy.hp <= 0) return
+
+				state.enemy.block = 0
+				logAction('敌方行动')
+
+				const intent = state.enemy.intent
+				if (intent.type === 'attack') {
+					dealDamageToPlayer(intent.val)
+				} else if (intent.type === 'buff') {
+					addEnemyBlock(intent.val)
+				} else if (intent.type === 'attack_defend') {
+					dealDamageToPlayer(intent.attackVal)
+					addEnemyBlock(intent.blockVal)
+				}
+
+				updateUI()
+
+				if (!checkGameState()) {
+					setTimeout(() => {
+						setEnemyIntent()
+						startPlayerTurn()
+					}, 800)
+				}
+			}
+
+			function checkGameState() {
+				if (state.enemy.hp <= 0) {
+					state.enemy.hp = 0
+					updateUI()
+					showGameOver(true)
+					return true
+				}
+				if (state.player.hp <= 0) {
+					state.player.hp = 0
+					updateUI()
+					showGameOver(false)
+					return true
+				}
+				return false
+			}
+
+			function showGameOver(isWin) {
+				const modal = document.getElementById('game-over-modal')
+				const title = document.getElementById('game-over-title')
+				const desc = document.getElementById('game-over-desc')
+
+				if (isWin) {
+					title.textContent = '战斗胜利'
+					title.className = 'modal-title victory'
+					desc.textContent = '目标已被消灭。'
+				} else {
+					title.textContent = '战斗失败'
+					title.className = 'modal-title defeat'
+					desc.textContent = '系统崩溃。'
+				}
+
+				modal.classList.add('active')
+			}
+
+			// --- Render ---
+			window.updateUI = function () {
+				document.getElementById('player-hp').textContent = `${state.player.hp}/${state.player.maxHp}`
+				document.getElementById('player-hp-fill').style.width = `${(state.player.hp / state.player.maxHp) * 100}%`
+
+				const pb = document.getElementById('player-block')
+				pb.textContent = state.player.block
+				if (state.player.block > 0) pb.classList.add('active')
+				else pb.classList.remove('active')
+
+				document.getElementById('enemy-hp').textContent = `${state.enemy.hp}/${state.enemy.maxHp}`
+				document.getElementById('enemy-hp-fill').style.width = `${(state.enemy.hp / state.enemy.maxHp) * 100}%`
+
+				const eb = document.getElementById('enemy-block')
+				eb.textContent = state.enemy.block
+				if (state.enemy.block > 0) eb.classList.add('active')
+				else eb.classList.remove('active')
+
+				const ei = document.getElementById('enemy-intent')
+				if (state.enemy.intent) {
+					ei.textContent = state.enemy.intent.desc
+					ei.className = `intent-box visible intent-${state.enemy.intent.type.split('_')[0]}`
+				}
+
+				document.getElementById('energy-val').textContent = state.player.energy
+				document.getElementById('draw-count').textContent = state.drawPile.length
+				document.getElementById('discard-count').textContent = state.discardPile.length
+
+				const handContainer = document.getElementById('hand')
+				handContainer.innerHTML = ''
+
+				const totalCards = state.hand.length
+
+				state.hand.forEach((cardId, index) => {
+					const cardData = CARDS[cardId]
+					const cardEl = document.createElement('div')
+
+					const canPlay = state.player.energy >= cardData.cost && state.turn === 'player'
+					cardEl.className = `card type-${cardData.type} ${canPlay ? '' : 'disabled'}`
+
+					let angle = 0
+					let yOffset = 0
+
+					if (totalCards > 1) {
+						angle = (index - (totalCards - 1) / 2) * 5
+						yOffset = Math.abs(index - (totalCards - 1) / 2) * 8
+					}
+
+					cardEl.style.transform = `rotate(${angle}deg) translateY(${yOffset}px)`
+
+					cardEl.innerHTML = `
+                    <div class="card-cost">${cardData.cost}</div>
+                    <div class="card-header">
+                        <div class="card-title">${cardData.name}</div>
+                        <div class="card-type">${cardData.type === 'attack' ? '攻击' : '技能'}</div>
+                    </div>
+                    <div class="card-art">${cardData.icon}</div>
+                    <div class="card-desc">${cardData.desc}</div>
+                `
+
+					if (canPlay) {
+						cardEl.onclick = () => window.playCard(index)
+					}
+
+					handContainer.appendChild(cardEl)
+				})
+			}
+
+			// Start
+			initGame()
+		</script>
+	</body>
+</html>

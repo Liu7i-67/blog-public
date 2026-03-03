@@ -1,0 +1,1171 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>矢量战机 // VECTOR STRIKE</title>
+		<link rel="icon" href="/favicon.png" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet" />
+		<style>
+			:root {
+				--bg-color: #030305;
+				--grid-color: rgba(0, 255, 255, 0.1);
+				--p-cyan: #00ffff;
+				--p-pink: #ff007f;
+				--p-yellow: #ffea00;
+				--p-green: #00ff00;
+				--p-purple: #9d00ff;
+				--ui-text: #e2e8f0;
+			}
+
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+				user-select: none;
+			}
+
+			body {
+				background-color: var(--bg-color);
+				color: var(--ui-text);
+				font-family: 'Share Tech Mono', 'Noto Sans SC', monospace;
+				height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				overflow: hidden;
+				/* Cyberpunk Scanlines */
+				background-image: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.4) 50%), radial-gradient(circle at center, #101018 0%, #000 100%);
+				background-size:
+					100% 4px,
+					100% 100%;
+			}
+
+			.game-container {
+				position: relative;
+				width: 100%;
+				max-width: 500px;
+				height: 100vh;
+				max-height: 800px;
+				border-left: 2px solid rgba(0, 255, 255, 0.3);
+				border-right: 2px solid rgba(0, 255, 255, 0.3);
+				box-shadow: 0 0 40px rgba(0, 255, 255, 0.05);
+				background: #000;
+				overflow: hidden;
+			}
+
+			/* Ambient glowing grid inside container */
+			.game-container::before {
+				content: '';
+				position: absolute;
+				inset: 0;
+				background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+				background-size: 40px 40px;
+				background-position: center bottom;
+				animation: scrollGrid 3s linear infinite;
+				z-index: 1;
+				pointer-events: none;
+				opacity: 0.3;
+				transform: perspective(500px) rotateX(45deg) scale(2);
+				transform-origin: bottom center;
+			}
+
+			@keyframes scrollGrid {
+				from {
+					background-position: center 0;
+				}
+				to {
+					background-position: center 40px;
+				}
+			}
+
+			canvas {
+				display: block;
+				position: relative;
+				z-index: 5;
+				width: 100%;
+				height: 100%;
+			}
+
+			/* HUD */
+			.hud {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				padding: 20px;
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				z-index: 20;
+				pointer-events: none;
+				background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+			}
+
+			.hud-block {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+
+			.hud-label {
+				font-size: 0.75rem;
+				color: var(--p-cyan);
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				opacity: 0.8;
+			}
+
+			.hud-value {
+				font-size: 1.8rem;
+				font-weight: 700;
+				color: #fff;
+				text-shadow: 0 0 10px var(--p-cyan);
+				font-variant-numeric: tabular-nums;
+				line-height: 1;
+			}
+
+			.hp-bar-container {
+				width: 120px;
+				height: 8px;
+				background: rgba(255, 255, 255, 0.1);
+				border: 1px solid var(--p-cyan);
+				margin-top: 5px;
+				position: relative;
+			}
+
+			.hp-bar {
+				height: 100%;
+				background: var(--p-cyan);
+				box-shadow: 0 0 10px var(--p-cyan);
+				width: 100%;
+				transition:
+					width 0.2s,
+					background-color 0.2s;
+			}
+
+			.hp-bar.low {
+				background: var(--p-pink);
+				box-shadow: 0 0 10px var(--p-pink);
+				border-color: var(--p-pink);
+			}
+
+			.ult-container {
+				display: flex;
+				gap: 5px;
+				margin-top: 5px;
+			}
+
+			.ult-charge {
+				width: 15px;
+				height: 15px;
+				border: 1px solid var(--p-yellow);
+				transform: rotate(45deg);
+				opacity: 0.3;
+				transition: all 0.3s;
+			}
+			.ult-charge.active {
+				background: var(--p-yellow);
+				box-shadow: 0 0 10px var(--p-yellow);
+				opacity: 1;
+			}
+
+			/* Overlay Screens */
+			.overlay {
+				position: absolute;
+				inset: 0;
+				background: rgba(0, 0, 5, 0.85);
+				backdrop-filter: blur(5px);
+				z-index: 50;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				text-align: center;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.4s;
+			}
+
+			.overlay.active {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			.glitch-title {
+				font-size: 4rem;
+				font-weight: 900;
+				color: #fff;
+				text-transform: uppercase;
+				letter-spacing: 4px;
+				margin-bottom: 10px;
+				position: relative;
+				text-shadow:
+					0.05em 0 0 rgba(255, 0, 0, 0.75),
+					-0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+					0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+				animation: glitch 500ms infinite;
+			}
+
+			@keyframes glitch {
+				0% {
+					text-shadow:
+						0.05em 0 0 rgba(255, 0, 0, 0.75),
+						-0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+						-0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+				}
+				14% {
+					text-shadow:
+						0.05em 0 0 rgba(255, 0, 0, 0.75),
+						-0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+						-0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+				}
+				15% {
+					text-shadow:
+						-0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+						0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+						-0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+				}
+				49% {
+					text-shadow:
+						-0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+						0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+						-0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+				}
+				50% {
+					text-shadow:
+						0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+						0.05em 0 0 rgba(0, 255, 0, 0.75),
+						0 -0.05em 0 rgba(0, 0, 255, 0.75);
+				}
+				99% {
+					text-shadow:
+						0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+						0.05em 0 0 rgba(0, 255, 0, 0.75),
+						0 -0.05em 0 rgba(0, 0, 255, 0.75);
+				}
+				100% {
+					text-shadow:
+						-0.025em 0 0 rgba(255, 0, 0, 0.75),
+						-0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+						-0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+				}
+			}
+
+			.overlay p {
+				color: var(--p-cyan);
+				font-size: 1rem;
+				margin-bottom: 40px;
+				letter-spacing: 2px;
+			}
+
+			.btn {
+				background: transparent;
+				color: var(--p-yellow);
+				font-family: inherit;
+				font-weight: 700;
+				font-size: 1.2rem;
+				padding: 12px 30px;
+				border: 2px solid var(--p-yellow);
+				cursor: pointer;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+				transition: all 0.2s;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.btn:hover {
+				background: var(--p-yellow);
+				color: #000;
+				box-shadow: 0 0 20px var(--p-yellow);
+			}
+
+			.instructions {
+				margin-top: 30px;
+				font-size: 0.8rem;
+				color: rgba(255, 255, 255, 0.5);
+				line-height: 1.6;
+			}
+
+			.key {
+				display: inline-block;
+				border: 1px solid rgba(255, 255, 255, 0.3);
+				padding: 2px 6px;
+				border-radius: 2px;
+				color: #fff;
+			}
+
+			/* Damage Flash */
+			.damage-flash {
+				position: absolute;
+				inset: 0;
+				background: rgba(255, 0, 127, 0.3);
+				z-index: 40;
+				pointer-events: none;
+				opacity: 0;
+				transition: opacity 0.1s;
+			}
+			.damage-flash.active {
+				opacity: 1;
+			}
+
+			.ult-flash {
+				position: absolute;
+				inset: 0;
+				background: #ffffff;
+				z-index: 45;
+				pointer-events: none;
+				opacity: 0;
+				transition: opacity 0.3s ease-out;
+			}
+			.ult-flash.active {
+				opacity: 1;
+				transition: opacity 0.05s ease-in;
+			}
+
+			/* Boss Warning */
+			.boss-warning {
+				position: absolute;
+				top: 50%;
+				left: 0;
+				right: 0;
+				transform: translateY(-50%);
+				text-align: center;
+				color: var(--p-pink);
+				font-family: 'Black Ops One', cursive;
+				font-size: 3rem;
+				letter-spacing: 10px;
+				text-shadow: 0 0 20px var(--p-pink);
+				z-index: 30;
+				pointer-events: none;
+				opacity: 0;
+				background: rgba(255, 0, 127, 0.2);
+				padding: 20px 0;
+				border-top: 2px solid var(--p-pink);
+				border-bottom: 2px solid var(--p-pink);
+				transition: opacity 0.2s;
+			}
+			.boss-warning.active {
+				animation: warnFlash 0.5s infinite alternate;
+			}
+			@keyframes warnFlash {
+				from {
+					opacity: 0.5;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="game-container">
+			<!-- HUD -->
+			<div class="hud">
+				<div class="hud-block">
+					<span class="hud-label">作战得分</span>
+					<span class="hud-value" id="scoreUi">0</span>
+					<div class="ult-container">
+						<div class="ult-charge" id="ult1"></div>
+						<div class="ult-charge" id="ult2"></div>
+						<div class="ult-charge" id="ult3"></div>
+					</div>
+					<span class="hud-label" style="font-size: 0.6rem; margin-top: 2px">全屏大招 (空格/双击)</span>
+				</div>
+				<div class="hud-block" style="align-items: flex-end">
+					<span class="hud-label">装甲完整度</span>
+					<span class="hud-value" id="hpUi">100%</span>
+					<div class="hp-bar-container">
+						<div class="hp-bar" id="hpBar"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="damage-flash" id="damageFlash"></div>
+			<div class="ult-flash" id="ultFlash"></div>
+			<div class="boss-warning" id="bossWarning">警告：高维实体接近</div>
+
+			<!-- Canvas -->
+			<canvas id="gameCanvas"></canvas>
+
+			<!-- Start Screen -->
+			<div class="overlay active" id="startScreen">
+				<h1 class="glitch-title">矢量战机</h1>
+				<p>NEO-VECTOR STRIKE</p>
+				<button class="btn" onclick="startGame()">建立连接</button>
+				<div class="instructions">
+					按住并拖动 <span class="key">鼠标/触摸</span> 控制战机<br />
+					双击或按下 <span class="key">SPACE</span> 释放全屏核弹<br />
+					收集掉落道具强化火力<br />
+					击败高维实体首领
+				</div>
+			</div>
+
+			<!-- Game Over Screen -->
+			<div class="overlay" id="gameOverScreen">
+				<h1 class="glitch-title" style="color: var(--p-pink)">系统摧毁</h1>
+				<p>信号中断 // MISSION FAILED</p>
+				<div style="margin-bottom: 30px">
+					<span class="hud-label" style="font-size: 1rem">最终得分</span><br />
+					<span class="hud-value" id="finalScore" style="font-size: 3rem; color: var(--p-yellow)">0</span>
+				</div>
+				<button class="btn" onclick="startGame()">重新部署</button>
+			</div>
+		</div>
+
+		<script>
+			const canvas = document.getElementById('gameCanvas')
+			const ctx = canvas.getContext('2d')
+			const startScreen = document.getElementById('startScreen')
+			const gameOverScreen = document.getElementById('gameOverScreen')
+			const scoreUi = document.getElementById('scoreUi')
+			const hpUi = document.getElementById('hpUi')
+			const hpBar = document.getElementById('hpBar')
+			const finalScoreUi = document.getElementById('finalScore')
+			const damageFlash = document.getElementById('damageFlash')
+			const ultFlash = document.getElementById('ultFlash')
+			const bossWarning = document.getElementById('bossWarning')
+			const ultChargesUi = [document.getElementById('ult1'), document.getElementById('ult2'), document.getElementById('ult3')]
+
+			// Set canvas size
+			function resize() {
+				canvas.width = canvas.parentElement.clientWidth
+				canvas.height = canvas.parentElement.clientHeight
+			}
+			window.addEventListener('resize', resize)
+			resize()
+
+			// Game State
+			let gameState = 'start' // start, playing, gameover
+			let score = 0
+			let frameCount = 0
+			let animationId
+			let bossTargetScore = 1000
+			let bossCount = 0
+			let isBossActive = false
+
+			// Entities
+			let player = {}
+			let bullets = []
+			let enemyBullets = []
+			let enemies = []
+			let particles = []
+			let stars = []
+			let items = []
+
+			// Input
+			let mouseX = canvas.width / 2
+			let mouseY = canvas.height - 100
+			let lastClickTime = 0
+
+			canvas.addEventListener('mousemove', e => {
+				if (gameState !== 'playing') return
+				const rect = canvas.getBoundingClientRect()
+				mouseX = e.clientX - rect.left
+				mouseY = e.clientY - rect.top
+			})
+
+			canvas.addEventListener(
+				'touchmove',
+				e => {
+					if (gameState !== 'playing') return
+					e.preventDefault()
+					const rect = canvas.getBoundingClientRect()
+					mouseX = e.touches[0].clientX - rect.left
+					mouseY = e.touches[0].clientY - rect.top
+				},
+				{ passive: false }
+			)
+
+			// Ultimate Activation triggers
+			window.addEventListener('keydown', e => {
+				if (gameState === 'playing' && e.code === 'Space') {
+					useUltimate()
+				}
+			})
+
+			canvas.addEventListener('click', e => {
+				if (gameState !== 'playing') return
+				const now = Date.now()
+				if (now - lastClickTime < 300) {
+					useUltimate()
+				}
+				lastClickTime = now
+			})
+
+			function initStars() {
+				stars = []
+				for (let i = 0; i < 50; i++) {
+					stars.push({
+						x: Math.random() * canvas.width,
+						y: Math.random() * canvas.height,
+						size: Math.random() * 2,
+						speed: Math.random() * 5 + 2 // Faster speed to simulate flying forward
+					})
+				}
+			}
+
+			function startGame() {
+				gameState = 'playing'
+				startScreen.classList.remove('active')
+				gameOverScreen.classList.remove('active')
+				bossWarning.classList.remove('active')
+
+				score = 0
+				frameCount = 0
+				bossTargetScore = 1000
+				bossCount = 0
+				isBossActive = false
+				scoreUi.innerText = score
+
+				player = {
+					x: canvas.width / 2,
+					y: canvas.height - 80,
+					size: 15,
+					hp: 100,
+					maxHp: 100,
+					fireRate: 8, // frames between shots
+					lastFire: 0,
+					bulletCount: 2,
+					ultCharges: 1,
+					laserTimer: 0 // Duration laser is active
+				}
+				updateHpUi()
+				updateUltUi()
+
+				bullets = []
+				enemyBullets = []
+				enemies = []
+				particles = []
+				items = []
+				initStars()
+
+				if (animationId) cancelAnimationFrame(animationId)
+				gameLoop()
+			}
+
+			function updateHpUi() {
+				const hpPercent = Math.max(0, Math.min(100, (player.hp / player.maxHp) * 100))
+				hpUi.innerText = Math.floor(hpPercent) + '%'
+				hpBar.style.width = hpPercent + '%'
+				if (hpPercent <= 30) {
+					hpBar.classList.add('low')
+				} else {
+					hpBar.classList.remove('low')
+				}
+			}
+
+			function updateUltUi() {
+				for (let i = 0; i < 3; i++) {
+					if (i < player.ultCharges) {
+						ultChargesUi[i].classList.add('active')
+					} else {
+						ultChargesUi[i].classList.remove('active')
+					}
+				}
+			}
+
+			function useUltimate() {
+				if (player.ultCharges <= 0) return
+				player.ultCharges--
+				updateUltUi()
+
+				// Visual Flash
+				ultFlash.classList.add('active')
+				setTimeout(() => ultFlash.classList.remove('active'), 300)
+
+				// Screen Shake equivalent effect will be added to draw
+
+				// Damage all enemies
+				for (let i = enemies.length - 1; i >= 0; i--) {
+					let e = enemies[i]
+					e.hp -= 50 // Huge damage
+					createExplosion(e.x, e.y, '#FFFFFF', 10)
+					if (e.hp <= 0) {
+						score += Math.floor(e.size) * (e.isBoss ? 10 : 1)
+						scoreUi.innerText = score
+						createExplosion(e.x, e.y, e.color, e.isBoss ? 100 : 15)
+						if (e.isBoss) {
+							isBossActive = false
+							bossWarning.classList.remove('active')
+						}
+						enemies.splice(i, 1)
+					}
+				}
+
+				// Clear enemy bullets
+				enemyBullets = []
+			}
+
+			function takeDamage(amount) {
+				player.hp -= amount
+				updateHpUi()
+
+				// Flash effect
+				damageFlash.classList.add('active')
+				setTimeout(() => damageFlash.classList.remove('active'), 100)
+
+				if (player.hp <= 0) {
+					gameOver()
+				}
+			}
+
+			function gameOver() {
+				gameState = 'gameover'
+				finalScoreUi.innerText = score
+				gameOverScreen.classList.add('active')
+				createExplosion(player.x, player.y, '#00FFFF', 50)
+			}
+
+			function createExplosion(x, y, color, count) {
+				for (let i = 0; i < count; i++) {
+					const angle = Math.random() * Math.PI * 2
+					const speed = Math.random() * 5 + 1
+					particles.push({
+						x: x,
+						y: y,
+						vx: Math.cos(angle) * speed,
+						vy: Math.sin(angle) * speed,
+						life: 1,
+						decay: Math.random() * 0.05 + 0.02,
+						color: color,
+						size: Math.random() * 3 + 1
+					})
+				}
+			}
+
+			function spawnItem(x, y) {
+				if (Math.random() > 0.15) return // 15% drop rate
+
+				const types = ['heal', 'gun_up', 'ult', 'laser']
+				const type = types[Math.floor(Math.random() * types.length)]
+				let color = '#FFF'
+				let label = '?'
+
+				if (type === 'heal') {
+					color = varColor('--p-green')
+					label = 'H'
+				}
+				if (type === 'gun_up') {
+					color = varColor('--p-yellow')
+					label = 'W'
+				}
+				if (type === 'ult') {
+					color = varColor('--p-cyan')
+					label = 'U'
+				}
+				if (type === 'laser') {
+					color = varColor('--p-pink')
+					label = 'L'
+				}
+
+				items.push({ x, y, type, color, label, size: 12, vy: 2 })
+			}
+
+			function varColor(name) {
+				return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#FFF'
+			}
+
+			function spawnBoss() {
+				isBossActive = true
+				bossCount++
+				bossWarning.classList.add('active')
+
+				const size = 50 + bossCount * 10
+				const hp = 500 * bossCount
+				enemies.push({
+					x: canvas.width / 2,
+					y: -size,
+					size,
+					hp,
+					maxHp: hp,
+					speed: 1,
+					type: 99,
+					isBoss: true,
+					color: '#FF0000',
+					phase: 0,
+					moveTimer: 0,
+					lastFire: frameCount
+				})
+
+				// Next boss target
+				bossTargetScore = 1000 * Math.pow(2, bossCount)
+			}
+
+			function spawnEnemy() {
+				if (score >= bossTargetScore && !isBossActive) {
+					spawnBoss()
+					return
+				}
+
+				// Don't spawn normal enemies if boss is active
+				if (isBossActive) return
+
+				// Difficulty scaling
+				const spawnRate = Math.max(10, 60 - Math.floor(score / 300))
+				if (frameCount % spawnRate === 0) {
+					const size = Math.random() * 15 + 15
+					const x = Math.random() * (canvas.width - size * 2) + size
+					const hp = Math.floor(size / 5) + Math.floor(score / 1000)
+					const speed = Math.random() * 2 + 2 + score / 3000
+
+					// Types: 0=Linear, 1=Sine, 2=Homing
+					const type = Math.floor(Math.random() * 3)
+					let color = '#FF007F'
+					if (type === 1) color = '#FF5500'
+					if (type === 2) color = '#9D00FF'
+
+					enemies.push({
+						x,
+						y: -size,
+						size,
+						hp,
+						speed,
+						type,
+						color,
+						initialX: x,
+						timeOffset: Math.random() * 100,
+						lastFire: frameCount + Math.floor(Math.random() * 60)
+					})
+				}
+			}
+
+			function enemyFire(e) {
+				// Only fire if inside screen bounds
+				if (e.y < 0 || e.y > canvas.height) return
+
+				if (e.isBoss) {
+					// Boss firing logic (e.g. spiral or targeted burst)
+					const fireRate = Math.max(30, 90 - bossCount * 10)
+					if (frameCount - e.lastFire >= fireRate) {
+						if (e.phase === 0) {
+							// Targeted spread
+							for (let i = -2; i <= 2; i++) {
+								const angle = Math.atan2(player.y - e.y, player.x - e.x) + i * 0.2
+								const speed = 6
+								enemyBullets.push({
+									x: e.x,
+									y: e.y + e.size,
+									vx: Math.cos(angle) * speed,
+									vy: Math.sin(angle) * speed,
+									size: 6,
+									color: '#FF0000',
+									damage: 10
+								})
+							}
+						} else {
+							// Circular burst
+							for (let i = 0; i < 12; i++) {
+								const angle = ((Math.PI * 2) / 12) * i + frameCount * 0.1
+								const speed = 4
+								enemyBullets.push({
+									x: e.x,
+									y: e.y,
+									vx: Math.cos(angle) * speed,
+									vy: Math.sin(angle) * speed,
+									size: 5,
+									color: '#FFEA00',
+									damage: 10
+								})
+							}
+						}
+						e.phase = e.phase === 0 ? 1 : 0
+						e.lastFire = frameCount
+					}
+				} else {
+					// Normal enemy firing logic
+					const fireChance = 0.005 + score / 200000 // Scales slightly with score
+					if (Math.random() < fireChance && frameCount - e.lastFire > 60) {
+						// Random velocity downwards-ish
+						const angle = Math.PI / 2 + (Math.random() - 0.5) // Downwards cone
+						const speed = Math.random() * 3 + 3
+						enemyBullets.push({
+							x: e.x,
+							y: e.y + e.size,
+							vx: Math.cos(angle) * speed,
+							vy: Math.sin(angle) * speed,
+							size: 4,
+							color: e.color,
+							damage: 5
+						})
+						e.lastFire = frameCount
+					}
+				}
+			}
+
+			function update() {
+				frameCount++
+
+				// Update Player
+				player.x += (mouseX - player.x) * 0.2
+				player.y += (mouseY - player.y) * 0.2
+				player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x))
+				player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y))
+
+				if (player.laserTimer > 0) player.laserTimer--
+
+				// Player Fire
+				if (frameCount - player.lastFire >= player.fireRate) {
+					if (player.laserTimer > 0) {
+						// Continuous Laser
+						bullets.push({
+							x: player.x,
+							y: player.y - player.size - 200, // stretches up
+							vy: -30,
+							width: 8,
+							height: 400,
+							color: varColor('--p-pink'),
+							damage: 2,
+							isLaser: true
+						})
+					} else {
+						// Normal Bullets
+						const spread = player.bulletCount > 3 ? 15 : 8
+						for (let i = 0; i < player.bulletCount; i++) {
+							const offsetX = (i - (player.bulletCount - 1) / 2) * spread
+							bullets.push({
+								x: player.x + offsetX,
+								y: player.y - player.size,
+								vy: -15,
+								width: 3,
+								height: 15,
+								color: '#00FFFF',
+								damage: 1
+							})
+						}
+					}
+					player.lastFire = frameCount
+				}
+
+				// Update Bullets
+				for (let i = bullets.length - 1; i >= 0; i--) {
+					let b = bullets[i]
+					b.y += b.vy
+					if (b.y < -canvas.height) {
+						bullets.splice(i, 1)
+					}
+				}
+
+				// Update Enemy Bullets
+				for (let i = enemyBullets.length - 1; i >= 0; i--) {
+					let eb = enemyBullets[i]
+					eb.x += eb.vx
+					eb.y += eb.vy
+
+					// Collision with player
+					if (Math.hypot(player.x - eb.x, player.y - eb.y) < player.size + eb.size) {
+						takeDamage(eb.damage)
+						createExplosion(eb.x, eb.y, eb.color, 5)
+						enemyBullets.splice(i, 1)
+						continue
+					}
+
+					if (eb.y > canvas.height + 50 || eb.x < -50 || eb.x > canvas.width + 50) {
+						enemyBullets.splice(i, 1)
+					}
+				}
+
+				// Update Stars (Moving background effect)
+				for (let s of stars) {
+					s.y += s.speed
+					if (s.y > canvas.height) {
+						s.y = 0
+						s.x = Math.random() * canvas.width
+					}
+				}
+
+				// Update Items
+				for (let i = items.length - 1; i >= 0; i--) {
+					let it = items[i]
+					it.y += it.vy
+
+					// Collision with player
+					if (Math.hypot(player.x - it.x, player.y - it.y) < player.size + it.size) {
+						if (it.type === 'heal') {
+							player.hp = Math.min(player.maxHp, player.hp + 30)
+							updateHpUi()
+						} else if (it.type === 'gun_up') {
+							player.bulletCount = Math.min(5, player.bulletCount + 1)
+						} else if (it.type === 'ult') {
+							player.ultCharges = Math.min(3, player.ultCharges + 1)
+							updateUltUi()
+						} else if (it.type === 'laser') {
+							player.laserTimer = 300 // 5 seconds at 60fps
+						}
+						createExplosion(it.x, it.y, it.color, 10)
+						items.splice(i, 1)
+						continue
+					}
+
+					if (it.y > canvas.height + it.size) items.splice(i, 1)
+				}
+
+				spawnEnemy()
+
+				// Update Enemies
+				for (let i = enemies.length - 1; i >= 0; i--) {
+					let e = enemies[i]
+
+					// Movement logic based on type
+					if (e.isBoss) {
+						e.moveTimer++
+						// Boss hovers near top and moves left/right
+						if (e.y < 150) e.y += e.speed
+						e.x = canvas.width / 2 + Math.sin(e.moveTimer * 0.02) * (canvas.width / 3)
+					} else if (e.type === 0) {
+						// Linear
+						e.y += e.speed
+						e.angle = (e.angle || 0) + 0.05
+					} else if (e.type === 1) {
+						// Sine Wave
+						e.y += e.speed * 0.8
+						e.x = e.initialX + Math.sin((frameCount + e.timeOffset) * 0.05) * 50
+					} else if (e.type === 2) {
+						// Homing (Slowly moves towards player X)
+						e.y += e.speed * 1.2
+						if (e.y < player.y) {
+							e.x += (player.x - e.x) * 0.01
+						}
+					}
+
+					// Enemy shoots
+					enemyFire(e)
+
+					// Check collision with player
+					const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y)
+					if (distToPlayer < player.size + e.size - 5) {
+						takeDamage(e.isBoss ? 30 : 15)
+						createExplosion(e.x, e.y, e.color, 20)
+						if (!e.isBoss) enemies.splice(i, 1) // remove enemy on crash, boss stays
+						continue
+					}
+
+					if (e.y > canvas.height + e.size) {
+						enemies.splice(i, 1) // remove off-screen
+					}
+				}
+
+				// Bullet - Enemy Collision
+				for (let i = bullets.length - 1; i >= 0; i--) {
+					let b = bullets[i]
+					let hit = false
+					for (let j = enemies.length - 1; j >= 0; j--) {
+						let e = enemies[j]
+
+						// Simple AABB collision for laser, circle for normal
+						let isHit = false
+						if (b.isLaser) {
+							isHit = b.x + b.width / 2 > e.x - e.size && b.x - b.width / 2 < e.x + e.size && b.y + b.height > e.y - e.size
+						} else {
+							isHit = b.x > e.x - e.size && b.x < e.x + e.size && b.y > e.y - e.size && b.y < e.y + e.size
+						}
+
+						if (isHit) {
+							e.hp -= b.damage
+							hit = true
+
+							if (!b.isLaser) createExplosion(b.x, b.y, '#FFFFFF', 3)
+
+							if (e.hp <= 0) {
+								score += Math.floor(e.size) * (e.isBoss ? 10 : 1)
+								scoreUi.innerText = score
+								createExplosion(e.x, e.y, e.color, e.isBoss ? 100 : 15)
+								spawnItem(e.x, e.y)
+
+								if (e.isBoss) {
+									isBossActive = false
+									bossWarning.classList.remove('active')
+								}
+								enemies.splice(j, 1) // Remove enemy body upon death
+							}
+							// Laser pierces, don't break loop or destroy bullet
+							if (!b.isLaser) break
+						}
+					}
+					if (hit && !b.isLaser) bullets.splice(i, 1) // Remove bullet
+				}
+
+				// Update Particles
+				for (let i = particles.length - 1; i >= 0; i--) {
+					let p = particles[i]
+					p.x += p.vx
+					p.y += p.vy
+					p.life -= p.decay
+					if (p.life <= 0) particles.splice(i, 1)
+				}
+			}
+
+			function drawNeonPolygon(ctx, x, y, points, color, glow) {
+				ctx.save()
+				ctx.translate(x, y)
+				ctx.beginPath()
+				ctx.moveTo(points[0].x, points[0].y)
+				for (let i = 1; i < points.length; i++) {
+					ctx.lineTo(points[i].x, points[i].y)
+				}
+				ctx.closePath()
+				ctx.strokeStyle = color
+				ctx.lineWidth = 2
+				ctx.shadowBlur = glow
+				ctx.shadowColor = color
+				ctx.stroke()
+				// Inner fill
+				ctx.fillStyle = color
+				ctx.globalAlpha = 0.2
+				ctx.fill()
+				ctx.restore()
+			}
+
+			function draw() {
+				// Screen shake effect if damaged recently
+				ctx.save()
+				if (damageFlash.classList.contains('active')) {
+					ctx.translate(Math.random() * 10 - 5, Math.random() * 10 - 5)
+				}
+
+				// Clear screen
+				ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+				// Draw Stars
+				ctx.fillStyle = '#FFF'
+				for (let s of stars) {
+					ctx.globalAlpha = s.speed / 6 // Faster stars = brighter, simulating parallax
+					ctx.fillRect(s.x, s.y, s.size, s.size * 2) // Stretch them slightly vertically to look like they are flying past
+				}
+				ctx.globalAlpha = 1.0
+
+				// If playing, draw player
+				if (gameState === 'playing') {
+					const pPoints = [
+						{ x: 0, y: -player.size },
+						{ x: player.size, y: player.size },
+						{ x: 0, y: player.size * 0.3 },
+						{ x: -player.size, y: player.size }
+					]
+					drawNeonPolygon(ctx, player.x, player.y, pPoints, varColor('--p-cyan'), 15)
+
+					// Engine thrust
+					ctx.fillStyle = varColor('--p-cyan')
+					ctx.globalAlpha = Math.random() * 0.5 + 0.5
+					ctx.shadowBlur = 10
+					ctx.shadowColor = varColor('--p-cyan')
+					ctx.beginPath()
+					ctx.moveTo(player.x - 4, player.y + player.size * 0.4)
+					ctx.lineTo(player.x + 4, player.y + player.size * 0.4)
+					ctx.lineTo(player.x, player.y + player.size + Math.random() * 15 + 5)
+					ctx.closePath()
+					ctx.fill()
+					ctx.globalAlpha = 1.0
+					ctx.shadowBlur = 0
+				}
+
+				// Draw Player Bullets
+				for (let b of bullets) {
+					ctx.fillStyle = b.color
+					ctx.shadowBlur = b.isLaser ? 20 : 10
+					ctx.shadowColor = b.color
+					ctx.fillRect(b.x - b.width / 2, b.y, b.width, b.height)
+				}
+				ctx.shadowBlur = 0
+
+				// Draw Enemy Bullets
+				for (let eb of enemyBullets) {
+					ctx.fillStyle = eb.color
+					ctx.shadowBlur = 10
+					ctx.shadowColor = eb.color
+					ctx.beginPath()
+					ctx.arc(eb.x, eb.y, eb.size, 0, Math.PI * 2)
+					ctx.fill()
+				}
+				ctx.shadowBlur = 0
+
+				// Draw Items
+				for (let it of items) {
+					ctx.strokeStyle = it.color
+					ctx.shadowBlur = 10
+					ctx.shadowColor = it.color
+					ctx.strokeRect(it.x - it.size, it.y - it.size, it.size * 2, it.size * 2)
+					ctx.fillStyle = it.color
+					ctx.font = '14px monospace'
+					ctx.textAlign = 'center'
+					ctx.textBaseline = 'middle'
+					ctx.fillText(it.label, it.x, it.y)
+				}
+				ctx.shadowBlur = 0
+
+				// Draw Enemies
+				for (let e of enemies) {
+					if (e.isBoss) {
+						// Boss shape
+						const pts = [
+							{ x: 0, y: e.size },
+							{ x: e.size, y: 0 },
+							{ x: e.size * 0.5, y: -e.size },
+							{ x: -e.size * 0.5, y: -e.size },
+							{ x: -e.size, y: 0 }
+						]
+						drawNeonPolygon(ctx, e.x, e.y, pts, e.color, 20)
+						// Boss HP bar
+						ctx.fillStyle = 'rgba(255,0,0,0.3)'
+						ctx.fillRect(e.x - e.size, e.y - e.size - 15, e.size * 2, 5)
+						ctx.fillStyle = e.color
+						ctx.fillRect(e.x - e.size, e.y - e.size - 15, e.size * 2 * (e.hp / e.maxHp), 5)
+					} else if (e.type === 0 || e.type === 2) {
+						// Square / Diamond based on rotation
+						ctx.save()
+						ctx.translate(e.x, e.y)
+						if (e.type === 0) ctx.rotate(e.angle) // Spin linear ones
+						const pts = [
+							{ x: -e.size, y: -e.size },
+							{ x: e.size, y: -e.size },
+							{ x: e.size, y: e.size },
+							{ x: -e.size, y: e.size }
+						]
+						drawNeonPolygon(ctx, 0, 0, pts, e.color, 15)
+						ctx.restore()
+					} else if (e.type === 1) {
+						// Triangle pointing down
+						const pts = [
+							{ x: 0, y: e.size },
+							{ x: e.size, y: -e.size },
+							{ x: -e.size, y: -e.size }
+						]
+						drawNeonPolygon(ctx, e.x, e.y, pts, e.color, 15)
+					}
+				}
+
+				// Draw Particles
+				for (let p of particles) {
+					if (p.life <= 0) continue // Safeguard
+					ctx.fillStyle = p.color
+					ctx.globalAlpha = Math.max(0, p.life)
+					ctx.shadowBlur = 5
+					ctx.shadowColor = p.color
+					ctx.beginPath()
+					ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+					ctx.closePath()
+					ctx.fill()
+				}
+				ctx.globalAlpha = 1.0
+				ctx.shadowBlur = 0
+
+				ctx.restore() // Restore from shake
+			}
+
+			function gameLoop() {
+				if (gameState === 'playing') {
+					update()
+				}
+				draw()
+				animationId = requestAnimationFrame(gameLoop)
+			}
+
+			// Draw initial state (stars)
+			initStars()
+			draw()
+		</script>
+	</body>
+</html>

@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8" />
+		<title>跳跃 // 奔跑 : 新纪元</title>
+		<link rel="icon" href="/favicon.png" />
+		<style>
+			@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Sans+SC:wght@700;900&display=swap');
+
+			:root {
+				--bg-dark: #09090b;
+				--neon-pink: #ff0055;
+				--neon-cyan: #00f0ff;
+				--neon-yellow: #faff00;
+				--pure-black: #000000;
+				--pure-white: #ffffff;
+				--grid-color: rgba(0, 240, 255, 0.15);
+			}
+
+			* {
+				box-sizing: border-box;
+				user-select: none;
+			}
+
+			body {
+				margin: 0;
+				padding: 0;
+				background-color: var(--bg-dark);
+				background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+				background-size: 40px 40px;
+				background-position: center center;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				min-height: 100vh;
+				color: var(--pure-white);
+				font-family: 'Space Mono', 'Noto Sans SC', monospace;
+				overflow: hidden;
+				perspective: 1000px;
+			}
+
+			/* Glitchy/Noise Overlay */
+			body::before {
+				content: '';
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100vw;
+				height: 100vh;
+				background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+				opacity: 0.04;
+				pointer-events: none;
+				z-index: 50;
+			}
+
+			.arcade-cabinet {
+				display: flex;
+				flex-direction: column;
+				gap: 20px;
+				padding: 30px;
+				background: rgba(10, 10, 12, 0.85);
+				backdrop-filter: blur(10px);
+				border: 4px solid var(--neon-cyan);
+				box-shadow:
+					20px 20px 0 var(--pure-black),
+					0 0 40px rgba(0, 240, 255, 0.2),
+					inset 0 0 20px rgba(0, 240, 255, 0.1);
+				transform: rotateX(2deg);
+				transition: transform 0.3s ease;
+			}
+
+			.arcade-cabinet:hover {
+				transform: rotateX(0deg);
+			}
+
+			header {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-end;
+				border-bottom: 4px dashed var(--neon-pink);
+				padding-bottom: 10px;
+			}
+
+			h1 {
+				margin: 0;
+				font-family: 'Black Ops One', 'Noto Sans SC', cursive;
+				font-size: 3rem;
+				line-height: 1;
+				letter-spacing: 4px;
+				color: var(--pure-white);
+				text-shadow:
+					4px 4px 0 var(--neon-pink),
+					-2px -2px 0 var(--neon-cyan);
+				text-transform: uppercase;
+			}
+
+			.version-badge {
+				background: var(--neon-yellow);
+				color: var(--pure-black);
+				padding: 4px 12px;
+				font-weight: 700;
+				font-size: 1.2rem;
+				transform: skew(-10deg);
+				box-shadow: 4px 4px 0 var(--neon-pink);
+			}
+
+			.screen-container {
+				position: relative;
+				width: 800px;
+				height: 600px;
+				border: 6px solid var(--pure-black);
+				background: var(--pure-black);
+				box-shadow:
+					0 0 0 4px var(--neon-pink),
+					0 0 30px rgba(255, 0, 85, 0.3);
+				overflow: hidden;
+			}
+
+			canvas {
+				display: block;
+				image-rendering: pixelated;
+			}
+
+			/* CRT Scanlines */
+			.scanlines {
+				position: absolute;
+				inset: 0;
+				background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+				background-size: 100% 4px;
+				pointer-events: none;
+				z-index: 10;
+			}
+
+			/* CRT Flicker */
+			.screen-container::after {
+				content: ' ';
+				display: block;
+				position: absolute;
+				top: 0;
+				left: 0;
+				bottom: 0;
+				right: 0;
+				background: rgba(18, 16, 16, 0.1);
+				opacity: 0;
+				z-index: 10;
+				pointer-events: none;
+				animation: flicker 0.15s infinite;
+			}
+
+			@keyframes flicker {
+				0% {
+					opacity: 0.05;
+				}
+				50% {
+					opacity: 0.01;
+				}
+				100% {
+					opacity: 0.08;
+				}
+			}
+
+			#overlay {
+				position: absolute;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.85);
+				backdrop-filter: blur(4px);
+				z-index: 20;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.3s;
+			}
+
+			#overlay.show {
+				opacity: 1;
+				pointer-events: auto;
+			}
+
+			#overlay h2 {
+				font-family: 'Black Ops One', 'Noto Sans SC', cursive;
+				font-size: 4rem;
+				margin: 0 0 30px 0;
+				color: var(--neon-yellow);
+				text-shadow:
+					6px 6px 0 var(--pure-black),
+					0 0 20px var(--neon-yellow);
+				animation: pulse 1.5s infinite alternate;
+			}
+
+			@keyframes pulse {
+				from {
+					transform: scale(1);
+				}
+				to {
+					transform: scale(1.05);
+				}
+			}
+
+			button {
+				background: var(--neon-cyan);
+				color: var(--pure-black);
+				font-family: 'Space Mono', monospace;
+				font-weight: 700;
+				font-size: 1.5rem;
+				border: 4px solid var(--pure-black);
+				padding: 15px 40px;
+				cursor: pointer;
+				box-shadow: 8px 8px 0 var(--neon-pink);
+				transition: all 0.1s;
+				text-transform: uppercase;
+			}
+
+			button:hover {
+				transform: translate(-4px, -4px);
+				box-shadow: 12px 12px 0 var(--neon-pink);
+			}
+
+			button:active {
+				transform: translate(4px, 4px);
+				box-shadow: 4px 4px 0 var(--neon-pink);
+			}
+
+			.controls {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-top: 10px;
+			}
+
+			.status-text {
+				color: var(--neon-cyan);
+				animation: blink 1s step-end infinite;
+			}
+
+			@keyframes blink {
+				50% {
+					opacity: 0;
+				}
+			}
+
+			.keys {
+				display: flex;
+				gap: 20px;
+			}
+
+			.key-group {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			kbd {
+				background: var(--pure-white);
+				color: var(--pure-black);
+				padding: 4px 12px;
+				border-bottom: 4px solid var(--pure-black);
+				border-right: 4px solid var(--pure-black);
+				font-weight: 700;
+				border-radius: 2px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="arcade-cabinet">
+			<header>
+				<h1>赛博<br />跳跃</h1>
+				<div class="version-badge">版本 1.0</div>
+			</header>
+
+			<div class="screen-container">
+				<canvas id="gameCanvas" width="800" height="600"></canvas>
+				<div class="scanlines"></div>
+				<div id="overlay">
+					<h2>系统已清理</h2>
+					<button onclick="resetGame()">重启程序</button>
+				</div>
+			</div>
+
+			<div class="controls">
+				<div class="status-text">> 请投币开始游戏_</div>
+				<div class="keys">
+					<div class="key-group">
+						<span>移动:</span>
+						<kbd>A</kbd> <kbd>D</kbd>
+					</div>
+					<div class="key-group">
+						<span>跳跃:</span>
+						<kbd>SPACE</kbd>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			const canvas = document.getElementById('gameCanvas')
+			const ctx = canvas.getContext('2d')
+			const overlay = document.getElementById('overlay')
+
+			// Style Colors mapped from CSS
+			const colors = {
+				bg: '#09090b',
+				pink: '#FF0055',
+				cyan: '#00F0FF',
+				yellow: '#FAFF00',
+				black: '#000000',
+				white: '#FFFFFF'
+			}
+
+			const player = {
+				x: 50,
+				y: 50,
+				width: 32,
+				height: 32,
+				velX: 0,
+				velY: 0,
+				speed: 5,
+				maxSpeed: 7,
+				jumpForce: 14,
+				gravity: 0.7,
+				friction: 0.8,
+				grounded: false,
+				facingRight: true
+			}
+
+			const keys = { left: false, right: false, up: false }
+
+			const platforms = [
+				{ x: -10, y: 560, w: 820, h: 50, type: 'ground' },
+				{ x: 180, y: 460, w: 140, h: 24, type: 'platform' },
+				{ x: 380, y: 360, w: 140, h: 24, type: 'platform' },
+				{ x: 600, y: 260, w: 140, h: 24, type: 'platform' },
+				{ x: 80, y: 220, w: 120, h: 24, type: 'platform' },
+				{ x: 380, y: 120, w: 80, h: 24, type: 'platform' },
+				{ x: 340, y: 400, w: 40, h: 40, type: 'block' }
+			]
+
+			const goal = { x: 720, y: 60, w: 60, h: 200 }
+			let gameWon = false
+			let particles = []
+
+			window.addEventListener('keydown', e => {
+				if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true
+				if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true
+				if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.code === 'Space') keys.up = true
+			})
+
+			window.addEventListener('keyup', e => {
+				if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false
+				if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false
+				if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.code === 'Space') keys.up = false
+			})
+
+			function checkCollision(r1, r2) {
+				return r1.x < r2.x + r2.w && r1.x + r1.width > r2.x && r1.y < r2.y + r2.h && r1.y + r1.height > r2.y
+			}
+
+			function createParticles(x, y, color, count = 5) {
+				for (let i = 0; i < count; i++) {
+					particles.push({
+						x: x + Math.random() * 20 - 10,
+						y: y + Math.random() * 10,
+						vx: (Math.random() - 0.5) * 4,
+						vy: Math.random() * -3,
+						life: 1.0,
+						color: color
+					})
+				}
+			}
+
+			function resetGame() {
+				player.x = 50
+				player.y = 50
+				player.velX = 0
+				player.velY = 0
+				gameWon = false
+				particles = []
+				overlay.classList.remove('show')
+				update() // restart loop
+			}
+
+			function update() {
+				if (gameWon) return // Stop logic loop when won
+
+				// Input
+				if (keys.up && player.grounded) {
+					player.velY = -player.jumpForce
+					player.grounded = false
+					createParticles(player.x + 16, player.y + 32, colors.pink, 10)
+				}
+				if (keys.left) {
+					player.velX -= 1
+					player.facingRight = false
+				}
+				if (keys.right) {
+					player.velX += 1
+					player.facingRight = true
+				}
+
+				// Physics
+				player.velX *= player.friction
+				player.velY += player.gravity
+
+				if (player.velX > player.maxSpeed) player.velX = player.maxSpeed
+				if (player.velX < -player.maxSpeed) player.velX = -player.maxSpeed
+
+				// X Collision
+				player.x += player.velX
+				for (let p of platforms) {
+					if (checkCollision(player, p)) {
+						if (player.velX > 0) {
+							player.x = p.x - player.width
+							player.velX = 0
+						} else if (player.velX < 0) {
+							player.x = p.x + p.w
+							player.velX = 0
+						}
+					}
+				}
+
+				// Y Collision
+				player.y += player.velY
+				player.grounded = false
+				for (let p of platforms) {
+					if (checkCollision(player, p)) {
+						if (player.velY > 0) {
+							player.y = p.y - player.height
+							player.velY = 0
+							player.grounded = true
+						} else if (player.velY < 0) {
+							player.y = p.y + p.h
+							player.velY = 0
+						}
+					}
+				}
+
+				// Boundaries
+				if (player.x < 0) {
+					player.x = 0
+					player.velX = 0
+				}
+				if (player.x + player.width > canvas.width) {
+					player.x = canvas.width - player.width
+					player.velX = 0
+				}
+				if (player.y > canvas.height + 100) resetGame() // Fall off bottom
+
+				// Update Particles
+				for (let i = particles.length - 1; i >= 0; i--) {
+					let p = particles[i]
+					p.x += p.vx
+					p.y += p.vy
+					p.life -= 0.05
+					if (p.life <= 0) particles.splice(i, 1)
+				}
+
+				// Running particles
+				if (Math.abs(player.velX) > 2 && player.grounded && Math.random() > 0.5) {
+					createParticles(player.x + 16, player.y + 32, colors.white, 1)
+				}
+
+				// Win Condition
+				if (checkCollision(player, goal)) {
+					gameWon = true
+					overlay.classList.add('show')
+					draw() // Final frame
+					return
+				}
+
+				draw()
+				requestAnimationFrame(update)
+			}
+
+			function draw() {
+				// Background Layer
+				ctx.fillStyle = colors.bg
+				ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+				// Draw Background Grid / Vibe
+				ctx.strokeStyle = 'rgba(0, 240, 255, 0.08)'
+				ctx.lineWidth = 2
+				ctx.beginPath()
+				for (let i = 0; i < canvas.width; i += 40) {
+					ctx.moveTo(i, 0)
+					ctx.lineTo(i, canvas.height)
+				}
+				for (let i = 0; i < canvas.height; i += 40) {
+					ctx.moveTo(0, i)
+					ctx.lineTo(canvas.width, i)
+				}
+				ctx.stroke()
+
+				// Draw Platforms (Neo-Brutalist Style)
+				for (let p of platforms) {
+					ctx.fillStyle = p.type === 'block' ? colors.yellow : colors.cyan
+					ctx.fillRect(p.x, p.y, p.w, p.h)
+
+					// Thick black border & offset inner stroke
+					ctx.strokeStyle = colors.black
+					ctx.lineWidth = 6
+					ctx.strokeRect(p.x, p.y, p.w, p.h)
+
+					ctx.strokeStyle = colors.white
+					ctx.lineWidth = 2
+					ctx.strokeRect(p.x + 4, p.y + 4, p.w - 8, p.h - 8)
+				}
+
+				// Draw Goal (Neon Portal / Gateway)
+				ctx.fillStyle = colors.yellow
+				ctx.fillRect(goal.x, goal.y, goal.w, goal.h)
+				ctx.strokeStyle = colors.black
+				ctx.lineWidth = 6
+				ctx.strokeRect(goal.x, goal.y, goal.w, goal.h)
+
+				ctx.fillStyle = colors.black
+				for (let i = 0; i < goal.h; i += 20) {
+					ctx.fillRect(goal.x + 10, goal.y + i + 5, goal.w - 20, 10)
+				}
+
+				// Draw Particles
+				for (let p of particles) {
+					ctx.fillStyle = p.color
+					ctx.globalAlpha = p.life
+					ctx.fillRect(p.x, p.y, 6, 6)
+					ctx.globalAlpha = 1.0
+				}
+
+				// Draw Player (Cyberpunk Square)
+				ctx.fillStyle = colors.pink
+				ctx.fillRect(player.x, player.y, player.width, player.height)
+
+				// Player Outline
+				ctx.strokeStyle = colors.black
+				ctx.lineWidth = 4
+				ctx.strokeRect(player.x, player.y, player.width, player.height)
+
+				// Player Visor / Eye (Directional)
+				ctx.fillStyle = colors.cyan
+				const eyeWidth = 12
+				const eyeHeight = 6
+				const eyeY = player.y + 8
+				if (player.facingRight) {
+					ctx.fillRect(player.x + 16, eyeY, eyeWidth, eyeHeight)
+				} else {
+					ctx.fillRect(player.x + 4, eyeY, eyeWidth, eyeHeight)
+				}
+
+				// Movement Trail / Shadow (Smear effect)
+				if (Math.abs(player.velX) > 2 || Math.abs(player.velY) > 2) {
+					ctx.fillStyle = 'rgba(255, 0, 85, 0.3)'
+					ctx.fillRect(player.x - player.velX, player.y - player.velY, player.width, player.height)
+				}
+			}
+
+			// Init
+			update()
+		</script>
+	</body>
+</html>
