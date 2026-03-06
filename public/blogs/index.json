@@ -1,5 +1,19 @@
 [
   {
+    "slug": "chrome_vscode_bug",
+    "title": "chrome无法呼起vscode",
+    "tags": [
+      "chrome",
+      "vscode",
+      "权限"
+    ],
+    "date": "2026-03-06T15:46",
+    "summary": "用的好好的插件突然就失灵了，开发体验极差！！！",
+    "cover": "/blogs/chrome_vscode_bug/627508558011dc8a.jpg",
+    "hidden": false,
+    "category": "日常"
+  },
+  {
     "slug": "study_next_js",
     "title": "折腾一番Nextjs",
     "tags": [
