@@ -22,7 +22,7 @@ vscode://file/E:%5Cqbb%5Cgitlab%5Ctaoxi-web%5Csrc%5Ccomponents%5CTXTable%5Cmodul
 
 ## 解决方案
 
-所有`Chrome`浏览器窗口，使用管理员身份运行即可
+关闭当前所有`Chrome`浏览器窗口，使用管理员身份重新运行chrome即可
 
 
 ## 过程
