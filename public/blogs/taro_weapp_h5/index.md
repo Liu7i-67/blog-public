@@ -129,6 +129,9 @@ html {
 在引入`X`文件的地方`IDE`会爆红
 2. 通过`style`进行设置
 
+> 考虑到兼容h5，尽量在使用h-[100vh]时使用h-[100dvh]代替  
+否则某些浏览器的导航栏部分会占用可视区域宽度，导致原本一屏展示的想法落空
+
 ## 设置h5网站图标
 在`src/index.html`中添加图标
 ```html
@@ -137,7 +140,7 @@ html {
 将图标放置到`根目录/public/`下  
 修改`config/index.ts`（`taro`不会自动复制`public`到产物中）
 ```ts
-***
+...
 copy: {
     patterns: [
         {
@@ -147,5 +150,50 @@ copy: {
       ],
       options: {},
 },
-***
+...
 ```
+
+## 真机调试
+
+由于我的手机和电脑不在一个网段，因此无法使用局域网进行访问
+
+真机效果和电脑端模拟还是有区别的，这一步无法跳过
+
+这时候需要使用`usb`链接手机和电脑通过`adb`进行端口映射
+
+```bash
+# 在手机上 设置--> 开发者选项 --> USB调试
+# 不同手机进入开发者模式的方式不同，自行搜索自己的手机如何进入开发者模式
+# 大概率是多次点击系统OS版本号
+
+# 在电脑端查询可用的移动端设备，如果啥也没有说明没连接上
+adb devices
+
+# 假设项目在电脑端运行的端口是10086，可以进行如下的端口映射
+adb reverse tcp:10086 tcp:10086
+
+# 此时可以使用手机直接访问http://localhost:10086
+```
+
+### 拓展一下adb相关操作
+```bash
+# 电脑端访问手机端服务（反向映射）
+adb forward tcp:10086 tcp:10086
+
+# 查看当前全部映射
+adb reverse --list
+adb forward --list
+
+# 取消某个端口映射
+adb reverse --remove tcp:10086
+adb forward --remove tcp:10086
+
+# 取消全部端口映射
+adb reverse --remove-all
+adb forward --remove-all
+```
+
+
+
+
+
