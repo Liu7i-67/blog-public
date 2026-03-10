@@ -116,3 +116,36 @@ html {
   font-size: calc(100vw / 37.5) !important;
 }
 ```
+
+## 平台差异化
+部分样式在`h5`中会失效，例如`border-[2rpx]`
+
+两种解决方案：
+1. 将当前文件名`X.tsx`修改为`X.weapp.tsx`  
+复制粘贴一个当前文件修改为`X.h5.tsx`  
+在`h5`文件中修改为`border-[1px]`  
+编译时`taro`会根据运行命令读取对应的文件  
+强迫症会比较难受  
+在引入`X`文件的地方`IDE`会爆红
+2. 通过`style`进行设置
+
+## 设置h5网站图标
+在`src/index.html`中添加图标
+```html
+<link rel="icon" href="/logo.png" type="image/png" />
+```
+将图标放置到`根目录/public/`下  
+修改`config/index.ts`（`taro`不会自动复制`public`到产物中）
+```ts
+***
+copy: {
+    patterns: [
+        {
+          from: "public",
+          to: "dist",
+        },
+      ],
+      options: {},
+},
+***
+```
