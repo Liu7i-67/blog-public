@@ -9,7 +9,32 @@
 ```
 
 ## 让该代理避开该域名直连
+
 我的代理是`Clash for Windows`
+
+### 方案一 JavaScript方案
+
+`设置`-->`Mixin`-->`编辑JavaScript`
+```js
+module.exports.parse = (config) => {
+  // 确保 rules 存在
+  if (!config.rules) {
+    config.rules = [];
+  }
+  
+  // 使用 unshift 将你的自定义直连规则插入到规则列表的最顶部（最优先匹配）
+  config.rules.unshift(
+    'DOMAIN,alive.github.com,DIRECT'
+  );
+  
+  // 返回修改后的完整配置，这样原本订阅里的 GitHub 等代理规则就会完好保留
+  return config;
+}
+```
+`常规`-->启动`Mixin`
+
+
+### 方案二 YAML方案
 
 `设置`-->`Mixin`-->`编辑YAML`
 ```txt
@@ -19,6 +44,8 @@ mixin:
 ```
 
 `常规`-->启动`Mixin`
+
+> 该访问会覆盖掉原本订阅文件里的所有规则，导致你的配置文件里现在只剩下这一条直连规则，其他网站（如 GitHub）因为找不到匹配的代理规则而无法访问。
 
 ### 拓展一下Mixin
 
