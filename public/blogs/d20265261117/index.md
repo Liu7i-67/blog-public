@@ -10,25 +10,24 @@
 
 ## 让该代理避开该域名直连
 
-我的代理是`Clash for Windows`
+我的代理是`Clash for Windows v0.20.16.4`
 
 ### 方案一 JavaScript方案
 
 `设置`-->`Mixin`-->`编辑JavaScript`
 ```js
-module.exports.parse = (config) => {
+module.exports.parse = ({ content, name, url }, { yaml, axios, notify }) => {
   // 确保 rules 存在
-  if (!config.rules) {
-    config.rules = [];
+  if (!content.rules) {
+    content.rules = [];
   }
-  
-  // 使用 unshift 将你的自定义直连规则插入到规则列表的最顶部（最优先匹配）
-  config.rules.unshift(
-    'DOMAIN,alive.github.com,DIRECT'
-  );
-  
-  // 返回修改后的完整配置，这样原本订阅里的 GitHub 等代理规则就会完好保留
-  return config;
+
+  // 将直连规则插入到原有规则的最前面
+  content.rules.unshift('DOMAIN,api.test.taoxiplan.com,DIRECT');
+
+  // 必须返回 content 对象
+  return content;
+}fig;
 }
 ```
 `常规`-->启动`Mixin`
