@@ -118,3 +118,9 @@ mixin:
 
 > Mixin 默认是**“覆盖/追加”逻辑。例如你写了 rules:，Mixin 会把你的规则拼接到原本配置文件的最上方**（优先匹配）。  
 缩进必须严格使用空格（YAML 语法），千万不能用 Tab 键，否则 CFW 会报错无法解析。
+
+
+## 本地后端服务允许跨域，但是前端仍然无法访问后端服务
+> 原因是新版本的chrome进行了显示，需要修改配置
+
+访问`chrome://flags/`，搜索`Local Network Access Checks`，将配置项内容修改为`disabled`
