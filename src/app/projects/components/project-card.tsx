@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useSize } from '@/hooks/use-size'
 import ImageUploadDialog, { type ImageItem } from './image-upload-dialog'
+import { toast } from 'sonner'
 
 export interface Project {
 	name: string
@@ -16,7 +17,18 @@ export interface Project {
 	tags: string[]
 	github?: string
 	npm?: string
+	/** @param Edge浏览器插件链接 */
+	edge?: string
+	/** @param Chrome浏览器插件链接 */
+	chrome?: string
+	/** @param app下载链接 */
+	app?: string
+	/** @param 需要请求获取的地址 */
+	requestType?: TRequestType
+	requestText?: string
 }
+
+export type TRequestType = 'milky'
 
 interface ProjectCardProps {
 	project: Project
@@ -61,6 +73,37 @@ export function ProjectCard({ project, isEditMode = false, onUpdate, onDelete }:
 	}
 
 	const canEdit = isEditMode && isEditing
+
+	const openRequestLink = async (type?: TRequestType) => {
+		if (!type) {
+			return
+		}
+		try {
+			switch (type) {
+				case 'milky':
+					{
+						// 1. 点击时发起请求
+						const res = await fetch('https://liuqi.cool:6678/milky/app_version.json')
+						if (!res.ok) throw new Error('网络请求失败')
+
+						const data = await res.json()
+						const androidUrl = data?.android?.url
+
+						// 2. 成功获取 URL 后，直接在当前页或新标签页打开下载链接
+						if (androidUrl) {
+							window.location.href = androidUrl
+							// 如果想在新标签页打开，用下面这行：
+							// window.open(androidUrl, '_blank');
+						} else {
+							toast.error('未找到有效的下载链接')
+						}
+					}
+					break
+			}
+		} catch (error) {
+			toast.error('打开链接失败')
+		}
+	}
 
 	return (
 		<motion.div
@@ -180,13 +223,15 @@ export function ProjectCard({ project, isEditMode = false, onUpdate, onDelete }:
 					</>
 				) : (
 					<>
-						<Link
-							href={localProject.url}
-							target='_blank'
-							rel='noopener noreferrer'
-							className='bg-card hover:bg-bg rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors'>
-							Website
-						</Link>
+						{localProject.url && (
+							<Link
+								href={localProject.url}
+								target='_blank'
+								rel='noopener noreferrer'
+								className='bg-card hover:bg-bg rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors'>
+								Website
+							</Link>
+						)}
 						{localProject.github && (
 							<Link
 								href={localProject.github}
@@ -203,6 +248,42 @@ export function ProjectCard({ project, isEditMode = false, onUpdate, onDelete }:
 								rel='noopener noreferrer'
 								className='bg-card hover:bg-bg rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors'>
 								NPM
+							</Link>
+						)}
+						{localProject.edge && (
+							<Link
+								href={localProject.edge}
+								target='_blank'
+								rel='noopener noreferrer'
+								className='bg-card hover:bg-bg rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors'>
+								Edge
+							</Link>
+						)}
+						{localProject.chrome && (
+							<Link
+								href={localProject.chrome}
+								target='_blank'
+								rel='noopener noreferrer'
+								className='bg-card hover:bg-bg rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors'>
+								Chrome
+							</Link>
+						)}
+						{localProject.app && (
+							<Link
+								href={localProject.app}
+								target='_blank'
+								rel='noopener noreferrer'
+								className='bg-card hover:bg-bg rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors'>
+								App
+							</Link>
+						)}
+						{localProject.requestType && (
+							<Link
+								href=''
+								onClick={() => openRequestLink(localProject.requestType)}
+								rel='noopener noreferrer'
+								className='bg-card hover:bg-bg rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors'>
+								{localProject.requestText || 'Link'}
 							</Link>
 						)}
 					</>

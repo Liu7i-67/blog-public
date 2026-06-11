@@ -5,7 +5,18 @@
 		"description": "流放之路国际服市集翻译插件",
 		"image": "https://store-images.s-microsoft.com/image/apps.56557.1a895a2d-7507-4726-9ee9-f1b0da7febbc.7b759647-0fcd-4275-ae61-cee3c838d530.5e8d660d-8e17-467a-9310-c54c539e990e?mode=scale&h=100&q=90&w=100",
 		"url": "https://liuqi.cool/poe_trade_cn/resource.html",
+		"edge": "https://microsoftedge.microsoft.com/addons/detail/poetradecn/bbhpnledaobkededmnccebmaeofjfika?hl=zh-cn",
+		"chrome": "https://chromewebstore.google.com/detail/poe-trade-cn/klfabjaginpkcnphmeinfpkadjhgmodb?hl=zh-CN",
 		"tags": ["流放之路", "插件"]
+	},
+	{
+		"name": "银禾家",
+		"year": 2025,
+		"description": "自用家庭APP，测试账号malou，密码ml123456",
+		"image": "/images/milky.png",
+		"tags": ["Flutter", "APP"],
+		"requestType": "milky",
+		"requestText": "APP"
 	},
 	{
 		"name": "ZA-MAP",
