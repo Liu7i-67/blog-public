@@ -12,11 +12,21 @@
 	{
 		"name": "银禾家",
 		"year": 2025,
+		"url": "https://www.llylq.cn/",
 		"description": "自用家庭APP，测试账号malou，密码ml123456",
 		"image": "/images/milky.png",
 		"tags": ["Flutter", "APP"],
 		"requestType": "milky",
-		"requestText": "APP"
+		"requestText": "APK下载"
+	},
+	{
+		"name": "柒",
+		"year": 2026,
+		"description": "基于Electorn的桌面小工具，实现了开机自启动、快捷键、快捷复制等功能",
+		"image": "/images/avatar.png",
+		"tags": ["Electorn", "APP"],
+		"requestType": "qi_desktop",
+		"requestText": "Window安装包下载"
 	},
 	{
 		"name": "ZA-MAP",
@@ -25,15 +35,6 @@
 		"image": "https://store-images.s-microsoft.com/image/apps.4698.a19b5545-abb9-4224-ac3a-5fe9ce306d8d.f5273633-72f6-4dce-abd9-8603f9273405.222d2f5f-1612-4034-a476-05089ef305b3?mode=scale&h=100&q=90&w=100",
 		"url": "https://liuqi.cool/za_map/index.html",
 		"tags": ["宝可梦", "地图", "插件"]
-	},
-	{
-		"name": "lib7i-react",
-		"year": 2025,
-		"description": "自用React组件库，不定时更新",
-		"image": "/images/avatar.png",
-		"tags": ["React", "Library"],
-		"npm": "https://www.npmjs.com/package/lib7i-react",
-		"url": "/"
 	},
 	{
 		"name": "Canvas画板",
@@ -50,5 +51,14 @@
 		"image": "/images/avatar.png",
 		"url": "https://liuqi.cool/",
 		"tags": ["Next.js", "MDX"]
+	},
+	{
+		"name": "lib7i-react",
+		"year": 2025,
+		"description": "自用React组件库，不定时更新",
+		"image": "/images/avatar.png",
+		"tags": ["React", "Library"],
+		"npm": "https://www.npmjs.com/package/lib7i-react",
+		"url": "/"
 	}
 ]

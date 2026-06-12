@@ -28,7 +28,7 @@ export interface Project {
 	requestText?: string
 }
 
-export type TRequestType = 'milky'
+export type TRequestType = 'milky' | 'qi_desktop'
 
 interface ProjectCardProps {
 	project: Project
@@ -92,8 +92,23 @@ export function ProjectCard({ project, isEditMode = false, onUpdate, onDelete }:
 						// 2. 成功获取 URL 后，直接在当前页或新标签页打开下载链接
 						if (androidUrl) {
 							window.location.href = androidUrl
-							// 如果想在新标签页打开，用下面这行：
-							// window.open(androidUrl, '_blank');
+						} else {
+							toast.error('未找到有效的下载链接')
+						}
+					}
+					break
+				case 'qi_desktop':
+					{
+						// 1. 点击时发起请求
+						const res = await fetch('https://liuqi.cool:6678/qi-desktop/qi_desktop_version.json')
+						if (!res.ok) throw new Error('网络请求失败')
+
+						const data = await res.json()
+						const androidUrl = data?.url
+
+						// 2. 成功获取 URL 后，直接在当前页或新标签页打开下载链接
+						if (androidUrl) {
+							window.location.href = androidUrl
 						} else {
 							toast.error('未找到有效的下载链接')
 						}
