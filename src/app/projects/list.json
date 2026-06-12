@@ -12,7 +12,6 @@
 	{
 		"name": "银禾家",
 		"year": 2025,
-		"url": "https://www.llylq.cn/",
 		"description": "自用家庭APP，测试账号malou，密码ml123456",
 		"image": "/images/milky.png",
 		"tags": ["Flutter", "APP"],
