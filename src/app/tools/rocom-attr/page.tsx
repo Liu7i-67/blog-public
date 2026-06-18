@@ -210,7 +210,7 @@ export default function App() {
 							<table className='w-full border-separate border-spacing-1 text-center text-sm'>
 								<thead>
 									<tr>
-										<th className={`bg-bg/60 text-secondary sticky top-0 left-0 z-40 min-w-[88px] rounded-xl p-2 text-[10px] tracking-widest uppercase`}>
+										<th className={`bg-bg/60 text-secondary sticky top-0 left-0 z-40 min-w-[88px] rounded-xl p-1 text-[10px] tracking-widest uppercase`}>
 											防守 →<br />
 											进攻 ↓
 										</th>
@@ -221,7 +221,7 @@ export default function App() {
 												<th
 													key={def}
 													onClick={() => handleDefClick(def)}
-													className={`sticky top-0 z-30 min-w-[60px] cursor-pointer rounded-xl p-2 transition-all duration-200 select-none ${
+													className={`sticky top-0 z-30 min-w-[60px] cursor-pointer rounded-xl p-1 transition-all duration-200 select-none ${
 														isActive
 															? 'bg-linear text-white shadow-[0_4px_12px_rgba(53,191,171,0.4)]'
 															: isHoveredCol
@@ -255,7 +255,7 @@ export default function App() {
 									{TYPES.map(atk => (
 										<tr key={atk} className='group'>
 											<th
-												className={`sticky left-0 z-20 min-w-[88px] rounded-xl p-2 transition-colors duration-200 ${
+												className={`sticky left-0 z-20 min-w-[88px] rounded-xl p-1 transition-colors duration-200 ${
 													hoveredCell?.row === atk ? 'bg-brand/10 text-brand' : 'text-primary bg-white/60'
 												}`}>
 												<AttrLabel type={atk} size={28} />
@@ -273,7 +273,7 @@ export default function App() {
 													<td
 														key={`${atk}-${def}`}
 														onMouseEnter={() => setHoveredCell({ row: atk, col: def })}
-														className={`relative cursor-pointer rounded-lg p-2 transition-all duration-200 ${getCellStyle(dmg)} ${
+														className={`relative cursor-pointer rounded-lg p-1 transition-all duration-200 ${getCellStyle(dmg)} ${
 															inCrosshair && !isHovered ? 'brightness-105 saturate-125' : ''
 														} ${isHovered ? 'ring-brand/60 z-30 scale-110 text-base font-black ring-2' : ''} ${dimMaskLg(isDimmed)}`}>
 														{dmg}
@@ -300,7 +300,7 @@ export default function App() {
 										</tr>
 									)}
 									<tr>
-										<th className={`bg-bg/60 text-secondary sticky top-0 left-0 z-40 min-w-[88px] rounded-xl p-2 text-[10px] tracking-widest uppercase`}>
+										<th className={`bg-bg/60 text-secondary sticky top-0 left-0 z-40 min-w-[88px] rounded-xl p-1 text-[10px] tracking-widest uppercase`}>
 											进攻 ↑<br />
 											防守 →
 										</th>
@@ -311,7 +311,7 @@ export default function App() {
 												<th
 													key={def}
 													onClick={() => handleDefClick(def)}
-													className={`sticky top-0 z-30 min-w-[60px] cursor-pointer rounded-xl p-2 transition-all duration-200 select-none ${
+													className={`sticky top-0 z-30 min-w-[60px] cursor-pointer rounded-xl p-1 transition-all duration-200 select-none ${
 														isActive
 															? 'bg-linear text-white shadow-[0_4px_12px_rgba(53,191,171,0.4)]'
 															: isHoveredCol
@@ -353,7 +353,7 @@ export default function App() {
 											key={type}
 											disabled={disabled}
 											onClick={() => toggleDefender(type)}
-											className={`flex flex-col items-center justify-center gap-1 rounded-2xl p-2 transition-all duration-200 ${
+											className={`flex flex-col items-center justify-center gap-1 rounded-2xl p-1 transition-all duration-200 ${
 												selected
 													? 'bg-linear scale-105 text-white shadow-[0_4px_12px_rgba(53,191,171,0.4)]'
 													: disabled
@@ -393,7 +393,7 @@ export default function App() {
 									</div>
 									<div className='space-y-2'>
 										{groupedResults.map(group => (
-											<div key={group.damage} className='flex items-start gap-3 rounded-2xl bg-white/40 p-2'>
+											<div key={group.damage} className='flex items-start gap-3 rounded-2xl bg-white/40 p-1'>
 												<div className={`flex h-12 w-16 shrink-0 items-center justify-center rounded-xl text-sm ${getCellStyle(group.damage)}`}>
 													{group.damage}x
 												</div>
