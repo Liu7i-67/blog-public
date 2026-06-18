@@ -1,8 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { ANIMATION_DELAY, INIT_DELAY } from '@/consts'
+
+const COMPACT_BREAKPOINT = 1350
 
 // --- 类型定义 ---
 type ElementType = string
@@ -79,6 +81,15 @@ function AttrLabel({ type, size = 28, vertical = false }: { type: ElementType; s
 export default function App() {
 	const [secondaryDef, setSecondaryDef] = useState<ElementType | null>(null)
 	const [hoveredCell, setHoveredCell] = useState<CellPosition | null>(null)
+	const [defenders, setDefenders] = useState<ElementType[]>([])
+	const [isCompact, setIsCompact] = useState(false)
+
+	useEffect(() => {
+		const check = () => setIsCompact(window.innerWidth < COMPACT_BREAKPOINT)
+		check()
+		window.addEventListener('resize', check)
+		return () => window.removeEventListener('resize', check)
+	}, [])
 
 	const getSingleDamage = (attacker: ElementType, defender: ElementType): number => {
 		const atkData = TYPE_DATA[attacker]
@@ -113,6 +124,30 @@ export default function App() {
 		setSecondaryDef(prev => (prev === type ? null : type))
 	}
 
+	const toggleDefender = (type: ElementType) => {
+		setDefenders(prev => {
+			if (prev.includes(type)) return prev.filter(t => t !== type)
+			if (prev.length >= 2) return prev
+			return [...prev, type]
+		})
+	}
+
+	// 紧凑模式下：以当前选择的防守属性为基准，对所有进攻属性按伤害降序分组
+	const groupedResults = useMemo(() => {
+		if (defenders.length === 0) return []
+		const def1 = defenders[0]
+		const def2 = defenders[1] || null
+		const map = new Map<number, ElementType[]>()
+		TYPES.forEach(atk => {
+			const dmg = getDamage(atk, def1, def2)
+			if (!map.has(dmg)) map.set(dmg, [])
+			map.get(dmg)!.push(atk)
+		})
+		return Array.from(map.entries())
+			.map(([damage, attackers]) => ({ damage, attackers }))
+			.sort((a, b) => b.damage - a.damage)
+	}, [defenders])
+
 	const legend = [
 		{ val: '3x', label: '效果拔群', dot: 'bg-gradient-to-br from-rose-400 to-rose-500' },
 		{ val: '2x', label: '克制', dot: 'bg-gradient-to-br from-orange-300 to-orange-400' },
@@ -132,7 +167,7 @@ export default function App() {
 					className='space-y-2 text-center'>
 					<p className='text-secondary text-xs tracking-[0.2em] uppercase'>Rocom Attribute Matrix</p>
 					<h1 className='text-2xl font-semibold'>洛克王国世界属性克制表</h1>
-					<p className='text-secondary text-sm'>点击 X 轴属性激活双防御体系，悬停查看十字高亮</p>
+					<p className='text-secondary text-sm'>{isCompact ? '勾选 1-2 个防守属性，查看所有进攻属性的伤害排名' : '点击 X 轴属性激活双防御体系，悬停查看十字高亮'}</p>
 				</motion.div>
 
 				{/* 图例 */}
@@ -148,7 +183,7 @@ export default function App() {
 							<span className='text-secondary'>{item.label}</span>
 						</div>
 					))}
-					{secondaryDef && (
+					{secondaryDef && !isCompact && (
 						<button
 							onClick={() => setSecondaryDef(null)}
 							className='border-brand text-brand hover:bg-brand/10 ml-2 flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition'>
@@ -159,11 +194,12 @@ export default function App() {
 				</motion.div>
 
 				{/* 矩阵主体 */}
-				<motion.div
-					initial={{ opacity: 0, scale: 0.9 }}
-					animate={{ opacity: 1, scale: 1 }}
-					transition={{ delay: INIT_DELAY + ANIMATION_DELAY * 2 }}
-					className='card relative overflow-hidden p-3'>
+				{!isCompact ? (
+					<motion.div
+						initial={{ opacity: 0, scale: 0.9 }}
+						animate={{ opacity: 1, scale: 1 }}
+						transition={{ delay: INIT_DELAY + ANIMATION_DELAY * 2 }}
+						className='card relative overflow-hidden p-3'>
 					<div className='custom-scrollbar overflow-auto' onMouseLeave={() => setHoveredCell(null)}>
 						<table className='w-full border-separate border-spacing-1 text-center text-sm'>
 							<thead>
@@ -288,6 +324,99 @@ export default function App() {
 						</table>
 					</div>
 				</motion.div>
+				) : (
+					<>
+						{/* 紧凑视图：选择防守属性 */}
+						<motion.div
+							initial={{ opacity: 0, scale: 0.9 }}
+							animate={{ opacity: 1, scale: 1 }}
+							transition={{ delay: INIT_DELAY + ANIMATION_DELAY * 2 }}
+							className='card relative'>
+							<div className='mb-3 flex items-center justify-between'>
+								<p className='text-secondary text-xs tracking-[0.2em] uppercase'>选择防守方（最多 2 个）</p>
+								{defenders.length > 0 && (
+									<button onClick={() => setDefenders([])} className='text-brand text-xs font-medium hover:underline'>
+										清空
+									</button>
+								)}
+							</div>
+							<div className='grid grid-cols-6 gap-2 max-md:grid-cols-5 max-sm:grid-cols-4 max-xs:grid-cols-3'>
+								{TYPES.map(type => {
+									const selected = defenders.includes(type)
+									const disabled = !selected && defenders.length >= 2
+									return (
+										<button
+											key={type}
+											disabled={disabled}
+											onClick={() => toggleDefender(type)}
+											className={`flex flex-col items-center justify-center gap-1 rounded-2xl p-2 transition-all duration-200 ${
+												selected
+													? 'bg-linear scale-105 text-white shadow-[0_4px_12px_rgba(53,191,171,0.4)]'
+													: disabled
+														? 'cursor-not-allowed bg-white/30 opacity-40'
+														: 'text-primary bg-white/60 hover:bg-white hover:shadow-sm'
+											}`}>
+											<img
+												src={ATTR_ICON(type)}
+												alt={type}
+												className='drop-shadow-sm'
+												style={{ width: 36, height: 36 }}
+											/>
+											<span className='text-xs font-medium'>{type}</span>
+										</button>
+									)
+								})}
+							</div>
+						</motion.div>
+
+						{/* 紧凑视图：进攻伤害排序 */}
+						<motion.div
+							initial={{ opacity: 0, scale: 0.9 }}
+							animate={{ opacity: 1, scale: 1 }}
+							transition={{ delay: INIT_DELAY + ANIMATION_DELAY * 3 }}
+							className='card relative'>
+							{defenders.length === 0 ? (
+								<div className='text-secondary flex flex-col items-center justify-center gap-2 py-12 text-center text-sm'>
+									<span className='text-2xl'>⚔️</span>
+									<span>请先在上方选择 1-2 个防守属性</span>
+								</div>
+							) : (
+								<div className='space-y-3'>
+									<div className='text-secondary flex flex-wrap items-center gap-2 text-xs tracking-[0.2em] uppercase'>
+										<span>进攻方对</span>
+										{defenders.map(d => (
+											<span key={d} className='bg-brand/10 text-brand inline-flex items-center gap-1 rounded-full px-2 py-0.5 normal-case'>
+												<img src={ATTR_ICON(d)} alt={d} className='h-3.5 w-3.5' />
+												{d}
+											</span>
+										))}
+										<span>的伤害（高 → 低）</span>
+									</div>
+									<div className='space-y-2'>
+										{groupedResults.map(group => (
+											<div key={group.damage} className='flex items-start gap-3 rounded-2xl bg-white/40 p-2'>
+												<div
+													className={`flex h-12 w-16 shrink-0 items-center justify-center rounded-xl text-sm ${getCellStyle(group.damage)}`}>
+													{group.damage}x
+												</div>
+												<div className='flex flex-1 flex-wrap gap-1.5 pt-1'>
+													{group.attackers.map(atk => (
+														<div
+															key={atk}
+															className='text-primary flex items-center gap-1.5 rounded-full bg-white/70 px-2 py-1 text-xs'>
+															<img src={ATTR_ICON(atk)} alt={atk} className='h-5 w-5' />
+															<span className='font-medium'>{atk}</span>
+														</div>
+													))}
+												</div>
+											</div>
+										))}
+									</div>
+								</div>
+							)}
+						</motion.div>
+					</>
+				)}
 			</div>
 
 			<style
