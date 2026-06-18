@@ -397,10 +397,10 @@ export default function App() {
 												<div className={`flex h-12 w-16 shrink-0 items-center justify-center rounded-xl text-sm ${getCellStyle(group.damage)}`}>
 													{group.damage}x
 												</div>
-												<div className='flex flex-1 flex-wrap gap-1.5 pt-1'>
+												<div className='flex flex-1 flex-wrap gap-1.5'>
 													{group.attackers.map(atk => (
-														<div key={atk} className='text-primary flex items-center gap-1.5 rounded-full bg-white/70 px-2 py-1 text-xs'>
-															<img src={ATTR_ICON(atk)} alt={atk} className='h-5 w-5' />
+														<div key={atk} className='flex h-12 w-16 shrink-0 items-center justify-center rounded-xl bg-white/70 text-sm'>
+															<img src={ATTR_ICON(atk)} alt={atk} className='h-8 w-8' />
 															<span className='font-medium'>{atk}</span>
 														</div>
 													))}
