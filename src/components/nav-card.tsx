@@ -17,6 +17,8 @@ import ShareFilledSVG from '@/svgs/share-filled.svg'
 import ShareOutlineSVG from '@/svgs/share-outline.svg'
 import WebsiteFilledSVG from '@/svgs/website-filled.svg'
 import WebsiteOutlineSVG from '@/svgs/website-outline.svg'
+import ToolsFilledSVG from '@/svgs/tools-filled.svg'
+import ToolsOutlineSVG from '@/svgs/tools-outline.svg'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 import { cn } from '@/lib/utils'
@@ -38,6 +40,12 @@ const list = [
 		href: '/projects'
 	},
 	{
+		icon: ToolsOutlineSVG,
+		iconActive: ToolsFilledSVG,
+		label: '一些工具',
+		href: '/tools'
+	},
+	{
 		icon: AboutOutlineSVG,
 		iconActive: AboutFilledSVG,
 		label: '游戏中心',
@@ -48,13 +56,13 @@ const list = [
 		iconActive: ShareFilledSVG,
 		label: '推荐分享',
 		href: '/share'
-	},
-	{
-		icon: WebsiteOutlineSVG,
-		iconActive: WebsiteFilledSVG,
-		label: '优秀博客',
-		href: '/bloggers'
 	}
+	// {
+	// 	icon: WebsiteOutlineSVG,
+	// 	iconActive: WebsiteFilledSVG,
+	// 	label: '优秀博客',
+	// 	href: '/bloggers'
+	// }
 ]
 
 const extraSize = 8
@@ -102,7 +110,7 @@ export default function NavCard() {
 
 	const size = useMemo(() => {
 		if (form === 'mini') return { width: 64, height: 64 }
-		else if (form === 'icons') return { width: 340, height: 64 }
+		else if (form === 'icons') return { width: 392, height: 64 }
 		else return { width: styles.width, height: styles.height }
 	}, [form, styles])
 
