@@ -243,6 +243,48 @@ export default function App() {
 									</tr>
 								))}
 							</tbody>
+							<thead>
+								{secondaryDef && (
+									<tr>
+										<th className='bg-brand/10 text-brand sticky left-0 z-30 rounded-xl p-1 text-[10px] tracking-widest uppercase'>+ 副 {secondaryDef}</th>
+										{TYPES.map(def => (
+											<th
+												key={`sub-${def}`}
+												className={`rounded-lg p-1 text-[11px] ${def === secondaryDef ? 'bg-brand/20 text-brand font-semibold' : 'text-brand/60 bg-white/30'}`}>
+												<div className='flex items-center justify-center gap-1'>
+													<img src={ATTR_ICON(secondaryDef)} alt={secondaryDef} className='h-3.5 w-3.5' />
+													<span>{secondaryDef}</span>
+												</div>
+											</th>
+										))}
+									</tr>
+								)}
+								<tr>
+									<th className='bg-bg/60 text-secondary sticky top-0 left-0 z-40 min-w-[88px] rounded-xl p-2 text-[10px] tracking-widest uppercase'>
+										进攻 ↑<br />
+										防守 →
+									</th>
+									{TYPES.map(def => {
+										const isActive = def === secondaryDef
+										const isHoveredCol = hoveredCell?.col === def
+										return (
+											<th
+												key={def}
+												onClick={() => handleDefClick(def)}
+												className={`sticky top-0 z-30 min-w-[60px] cursor-pointer rounded-xl p-2 transition-all duration-200 select-none ${
+													isActive
+														? 'bg-linear text-white shadow-[0_4px_12px_rgba(53,191,171,0.4)]'
+														: isHoveredCol
+															? 'bg-brand/10 text-brand'
+															: 'text-primary bg-white/60 hover:bg-white'
+												}`}
+												title={`点击将 [${def}] 设为副属性`}>
+												<AttrLabel type={def} size={28} vertical />
+											</th>
+										)
+									})}
+								</tr>
+							</thead>
 						</table>
 					</div>
 				</motion.div>
