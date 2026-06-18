@@ -91,6 +91,10 @@ export default function App() {
 		return () => window.removeEventListener('resize', check)
 	}, [])
 
+	const dimMaskBase = "after:pointer-events-none after:absolute after:inset-0 after:bg-black/50 after:transition-opacity after:duration-200 after:content-['']"
+	const dimMaskLg = (dimmed: boolean) => `${dimMaskBase} after:rounded-lg ${dimmed ? 'after:opacity-100' : 'after:opacity-0'}`
+	const dimMaskXl = (dimmed: boolean) => `${dimMaskBase} after:rounded-xl ${dimmed ? 'after:opacity-100' : 'after:opacity-0'}`
+
 	const getSingleDamage = (attacker: ElementType, defender: ElementType): number => {
 		const atkData = TYPE_DATA[attacker]
 		if (atkData.atk200.includes(defender)) return 2
@@ -167,7 +171,9 @@ export default function App() {
 					className='space-y-2 text-center'>
 					<p className='text-secondary text-xs tracking-[0.2em] uppercase'>Rocom Attribute Matrix</p>
 					<h1 className='text-2xl font-semibold'>洛克王国世界属性克制表</h1>
-					<p className='text-secondary text-sm'>{isCompact ? '勾选 1-2 个防守属性，查看所有进攻属性的伤害排名' : '点击 X 轴属性激活双防御体系，悬停查看十字高亮'}</p>
+					<p className='text-secondary text-sm'>
+						{isCompact ? '勾选 1-2 个防守属性，查看所有进攻属性的伤害排名' : '点击 X 轴属性激活双防御体系，悬停查看十字高亮'}
+					</p>
 				</motion.div>
 
 				{/* 图例 */}
@@ -200,130 +206,128 @@ export default function App() {
 						animate={{ opacity: 1, scale: 1 }}
 						transition={{ delay: INIT_DELAY + ANIMATION_DELAY * 2 }}
 						className='card relative overflow-hidden p-3'>
-					<div className='custom-scrollbar overflow-auto' onMouseLeave={() => setHoveredCell(null)}>
-						<table className='w-full border-separate border-spacing-1 text-center text-sm'>
-							<thead>
-								<tr>
-									<th className='bg-bg/60 text-secondary sticky top-0 left-0 z-40 min-w-[88px] rounded-xl p-2 text-[10px] tracking-widest uppercase'>
-										防守 →<br />
-										进攻 ↓
-									</th>
-									{TYPES.map(def => {
-										const isActive = def === secondaryDef
-										const isHoveredCol = hoveredCell?.col === def
-										return (
-											<th
-												key={def}
-												onClick={() => handleDefClick(def)}
-												className={`sticky top-0 z-30 min-w-[60px] cursor-pointer rounded-xl p-2 transition-all duration-200 select-none ${
-													isActive
-														? 'bg-linear text-white shadow-[0_4px_12px_rgba(53,191,171,0.4)]'
-														: isHoveredCol
-															? 'bg-brand/10 text-brand'
-															: 'text-primary bg-white/60 hover:bg-white'
-												}`}
-												title={`点击将 [${def}] 设为副属性`}>
-												<AttrLabel type={def} size={28} vertical />
-											</th>
-										)
-									})}
-								</tr>
-								{secondaryDef && (
+						<div className='custom-scrollbar overflow-auto' onMouseLeave={() => setHoveredCell(null)}>
+							<table className='w-full border-separate border-spacing-1 text-center text-sm'>
+								<thead>
 									<tr>
-										<th className='bg-brand/10 text-brand sticky left-0 z-30 rounded-xl p-1 text-[10px] tracking-widest uppercase'>+ 副 {secondaryDef}</th>
-										{TYPES.map(def => (
-											<th
-												key={`sub-${def}`}
-												className={`rounded-lg p-1 text-[11px] ${def === secondaryDef ? 'bg-brand/20 text-brand font-semibold' : 'text-brand/60 bg-white/30'}`}>
-												<div className='flex items-center justify-center gap-1'>
-													<img src={ATTR_ICON(secondaryDef)} alt={secondaryDef} className='h-3.5 w-3.5' />
-													<span>{secondaryDef}</span>
-												</div>
-											</th>
-										))}
-									</tr>
-								)}
-							</thead>
-
-							<tbody>
-								{TYPES.map(atk => (
-									<tr key={atk} className='group'>
-										<th
-											className={`sticky left-0 z-20 min-w-[88px] rounded-xl p-2 transition-colors duration-200 ${
-												hoveredCell?.row === atk ? 'bg-brand/10 text-brand' : 'text-primary bg-white/60'
-											}`}>
-											<AttrLabel type={atk} size={28} />
+										<th className={`bg-bg/60 text-secondary sticky top-0 left-0 z-40 min-w-[88px] rounded-xl p-2 text-[10px] tracking-widest uppercase`}>
+											防守 →<br />
+											进攻 ↓
 										</th>
-
 										{TYPES.map(def => {
-											const dmg = getDamage(atk, def, secondaryDef)
-
-											const isHovered = hoveredCell?.row === atk && hoveredCell?.col === def
-											const isAnyHovered = hoveredCell !== null
-											const inCrosshair = isAnyHovered && (hoveredCell.row === atk || hoveredCell.col === def)
-											const isDimmed = isAnyHovered && !inCrosshair
-
+											const isActive = def === secondaryDef
+											const isHoveredCol = hoveredCell?.col === def
 											return (
-												<td
-													key={`${atk}-${def}`}
-													onMouseEnter={() => setHoveredCell({ row: atk, col: def })}
-													className={`relative cursor-crosshair rounded-lg p-2 transition-all duration-200 ${getCellStyle(dmg)} ${
-														isDimmed ? 'scale-95 opacity-30' : 'scale-100 opacity-100'
-													} ${inCrosshair && !isHovered ? 'brightness-105 saturate-125' : ''} ${
-														isHovered ? 'ring-brand/60 z-30 scale-110 text-base font-black ring-2' : ''
-													}`}>
-													{dmg}
-												</td>
+												<th
+													key={def}
+													onClick={() => handleDefClick(def)}
+													className={`sticky top-0 z-30 min-w-[60px] cursor-pointer rounded-xl p-2 transition-all duration-200 select-none ${
+														isActive
+															? 'bg-linear text-white shadow-[0_4px_12px_rgba(53,191,171,0.4)]'
+															: isHoveredCol
+																? 'bg-brand/10 text-brand'
+																: 'text-primary bg-white/60 hover:bg-white'
+													} `}
+													title={`点击将 [${def}] 设为副属性`}>
+													<AttrLabel type={def} size={28} vertical />
+												</th>
 											)
 										})}
 									</tr>
-								))}
-							</tbody>
-							<thead>
-								{secondaryDef && (
+									{secondaryDef && (
+										<tr>
+											<th className={`bg-brand/10 text-brand sticky left-0 z-30 rounded-xl p-1 text-[10px] tracking-widest uppercase`}>+ 副 {secondaryDef}</th>
+											{TYPES.map(def => (
+												<th
+													key={`sub-${def}`}
+													className={`relative rounded-lg p-1 text-[11px] ${def === secondaryDef ? 'bg-brand/20 text-brand font-semibold' : 'text-brand/60 bg-white/30'}`}>
+													<div className='flex items-center justify-center gap-1'>
+														<img src={ATTR_ICON(secondaryDef)} alt={secondaryDef} className='h-3.5 w-3.5' />
+														<span>{secondaryDef}</span>
+													</div>
+												</th>
+											))}
+										</tr>
+									)}
+								</thead>
+
+								<tbody>
+									{TYPES.map(atk => (
+										<tr key={atk} className='group'>
+											<th
+												className={`sticky left-0 z-20 min-w-[88px] rounded-xl p-2 transition-colors duration-200 ${
+													hoveredCell?.row === atk ? 'bg-brand/10 text-brand' : 'text-primary bg-white/60'
+												}`}>
+												<AttrLabel type={atk} size={28} />
+											</th>
+
+											{TYPES.map(def => {
+												const dmg = getDamage(atk, def, secondaryDef)
+
+												const isHovered = hoveredCell?.row === atk && hoveredCell?.col === def
+												const isAnyHovered = hoveredCell !== null
+												const inCrosshair = isAnyHovered && (hoveredCell.row === atk || hoveredCell.col === def)
+												const isDimmed = isAnyHovered && !inCrosshair
+
+												return (
+													<td
+														key={`${atk}-${def}`}
+														onMouseEnter={() => setHoveredCell({ row: atk, col: def })}
+														className={`relative cursor-pointer rounded-lg p-2 transition-all duration-200 ${getCellStyle(dmg)} ${
+															inCrosshair && !isHovered ? 'brightness-105 saturate-125' : ''
+														} ${isHovered ? 'ring-brand/60 z-30 scale-110 text-base font-black ring-2' : ''} ${dimMaskLg(isDimmed)}`}>
+														{dmg}
+													</td>
+												)
+											})}
+										</tr>
+									))}
+								</tbody>
+								<thead>
+									{secondaryDef && (
+										<tr>
+											<th className={`bg-brand/10 text-brand sticky left-0 z-30 rounded-xl p-1 text-[10px] tracking-widest uppercase`}>+ 副 {secondaryDef}</th>
+											{TYPES.map(def => (
+												<th
+													key={`sub-${def}`}
+													className={`relative rounded-lg p-1 text-[11px] ${def === secondaryDef ? 'bg-brand/20 text-brand font-semibold' : 'text-brand/60 bg-white/30'} `}>
+													<div className='flex items-center justify-center gap-1'>
+														<img src={ATTR_ICON(secondaryDef)} alt={secondaryDef} className='h-3.5 w-3.5' />
+														<span>{secondaryDef}</span>
+													</div>
+												</th>
+											))}
+										</tr>
+									)}
 									<tr>
-										<th className='bg-brand/10 text-brand sticky left-0 z-30 rounded-xl p-1 text-[10px] tracking-widest uppercase'>+ 副 {secondaryDef}</th>
-										{TYPES.map(def => (
-											<th
-												key={`sub-${def}`}
-												className={`rounded-lg p-1 text-[11px] ${def === secondaryDef ? 'bg-brand/20 text-brand font-semibold' : 'text-brand/60 bg-white/30'}`}>
-												<div className='flex items-center justify-center gap-1'>
-													<img src={ATTR_ICON(secondaryDef)} alt={secondaryDef} className='h-3.5 w-3.5' />
-													<span>{secondaryDef}</span>
-												</div>
-											</th>
-										))}
+										<th className={`bg-bg/60 text-secondary sticky top-0 left-0 z-40 min-w-[88px] rounded-xl p-2 text-[10px] tracking-widest uppercase`}>
+											进攻 ↑<br />
+											防守 →
+										</th>
+										{TYPES.map(def => {
+											const isActive = def === secondaryDef
+											const isHoveredCol = hoveredCell?.col === def
+											return (
+												<th
+													key={def}
+													onClick={() => handleDefClick(def)}
+													className={`sticky top-0 z-30 min-w-[60px] cursor-pointer rounded-xl p-2 transition-all duration-200 select-none ${
+														isActive
+															? 'bg-linear text-white shadow-[0_4px_12px_rgba(53,191,171,0.4)]'
+															: isHoveredCol
+																? 'bg-brand/10 text-brand'
+																: 'text-primary bg-white/60 hover:bg-white'
+													} `}
+													title={`点击将 [${def}] 设为副属性`}>
+													<AttrLabel type={def} size={28} vertical />
+												</th>
+											)
+										})}
 									</tr>
-								)}
-								<tr>
-									<th className='bg-bg/60 text-secondary sticky top-0 left-0 z-40 min-w-[88px] rounded-xl p-2 text-[10px] tracking-widest uppercase'>
-										进攻 ↑<br />
-										防守 →
-									</th>
-									{TYPES.map(def => {
-										const isActive = def === secondaryDef
-										const isHoveredCol = hoveredCell?.col === def
-										return (
-											<th
-												key={def}
-												onClick={() => handleDefClick(def)}
-												className={`sticky top-0 z-30 min-w-[60px] cursor-pointer rounded-xl p-2 transition-all duration-200 select-none ${
-													isActive
-														? 'bg-linear text-white shadow-[0_4px_12px_rgba(53,191,171,0.4)]'
-														: isHoveredCol
-															? 'bg-brand/10 text-brand'
-															: 'text-primary bg-white/60 hover:bg-white'
-												}`}
-												title={`点击将 [${def}] 设为副属性`}>
-												<AttrLabel type={def} size={28} vertical />
-											</th>
-										)
-									})}
-								</tr>
-							</thead>
-						</table>
-					</div>
-				</motion.div>
+								</thead>
+							</table>
+						</div>
+					</motion.div>
 				) : (
 					<>
 						{/* 紧凑视图：选择防守属性 */}
@@ -340,7 +344,7 @@ export default function App() {
 									</button>
 								)}
 							</div>
-							<div className='grid grid-cols-6 gap-2 max-md:grid-cols-5 max-sm:grid-cols-4 max-xs:grid-cols-3'>
+							<div className='max-xs:grid-cols-3 grid grid-cols-6 gap-2 max-md:grid-cols-5 max-sm:grid-cols-4'>
 								{TYPES.map(type => {
 									const selected = defenders.includes(type)
 									const disabled = !selected && defenders.length >= 2
@@ -356,12 +360,7 @@ export default function App() {
 														? 'cursor-not-allowed bg-white/30 opacity-40'
 														: 'text-primary bg-white/60 hover:bg-white hover:shadow-sm'
 											}`}>
-											<img
-												src={ATTR_ICON(type)}
-												alt={type}
-												className='drop-shadow-sm'
-												style={{ width: 36, height: 36 }}
-											/>
+											<img src={ATTR_ICON(type)} alt={type} className='drop-shadow-sm' style={{ width: 36, height: 36 }} />
 											<span className='text-xs font-medium'>{type}</span>
 										</button>
 									)
@@ -395,15 +394,12 @@ export default function App() {
 									<div className='space-y-2'>
 										{groupedResults.map(group => (
 											<div key={group.damage} className='flex items-start gap-3 rounded-2xl bg-white/40 p-2'>
-												<div
-													className={`flex h-12 w-16 shrink-0 items-center justify-center rounded-xl text-sm ${getCellStyle(group.damage)}`}>
+												<div className={`flex h-12 w-16 shrink-0 items-center justify-center rounded-xl text-sm ${getCellStyle(group.damage)}`}>
 													{group.damage}x
 												</div>
 												<div className='flex flex-1 flex-wrap gap-1.5 pt-1'>
 													{group.attackers.map(atk => (
-														<div
-															key={atk}
-															className='text-primary flex items-center gap-1.5 rounded-full bg-white/70 px-2 py-1 text-xs'>
+														<div key={atk} className='text-primary flex items-center gap-1.5 rounded-full bg-white/70 px-2 py-1 text-xs'>
 															<img src={ATTR_ICON(atk)} alt={atk} className='h-5 w-5' />
 															<span className='font-medium'>{atk}</span>
 														</div>
