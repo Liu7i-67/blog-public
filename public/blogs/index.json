@@ -1,5 +1,17 @@
 [
   {
+    "slug": "electron_1",
+    "title": "electron笔记",
+    "tags": [
+      "electron"
+    ],
+    "date": "2026-07-02T16:17",
+    "summary": "electron笔记",
+    "cover": "/blogs/electron_1/7930bf7b96e0a0d1.svg",
+    "hidden": false,
+    "category": "学习"
+  },
+  {
     "slug": "vscode_202672",
     "title": "升级win11后vscode终端中文乱码问题",
     "tags": [
