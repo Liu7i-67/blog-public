@@ -1,5 +1,18 @@
 [
   {
+    "slug": "vscode_202672",
+    "title": "升级win11后vscode终端中文乱码问题",
+    "tags": [
+      "windows",
+      "vscode"
+    ],
+    "date": "2026-07-02T10:18",
+    "summary": "记录一下win10升级到win11的趣事",
+    "cover": "/blogs/vscode_202672/3d136e97b391076f.png",
+    "hidden": false,
+    "category": "日常"
+  },
+  {
     "slug": "d20265261117",
     "title": "内网ip映射域名",
     "tags": [
